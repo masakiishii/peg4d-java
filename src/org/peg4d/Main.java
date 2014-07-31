@@ -65,6 +65,9 @@ public class Main {
 	// --parser
 	public static String ParserType = "--parser";
 	
+	//--huffman
+	public static boolean Huffman = false;
+	
 	// -O
 	public static int OptimizationLevel = 2;
 	public static int MemoFactor = -1;
@@ -164,6 +167,9 @@ public class Main {
 			else if(argument.startsWith("--parser:")) {
 				ParserType = argument;
 			}
+			else if(argument.startsWith("--huffman")) {
+				Huffman = true;
+			}
 			else {
 				ShowUsage("unknown option: " + argument);
 			}
@@ -233,6 +239,10 @@ public class Main {
 		//while(p.hasNode()) {
 		p.beginPeformStat();
 		Pego pego = p.parseNode(startPoint);
+		if(Huffman) {
+			Huffman h = new Huffman(fileName);
+			h.encode(pego);
+		}
 		p.endPerformStat(pego);
 		//}
 		if(p.hasChar()) {
