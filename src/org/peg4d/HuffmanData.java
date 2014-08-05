@@ -1,28 +1,23 @@
 package org.peg4d;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 
 public class HuffmanData implements Comparator<HuffmanData> {
 	String tag;
-	String source;
-	String code;
-	int counter;
-	public HuffmanData(String tag, String source) {
+	String term;
+	ArrayList<Boolean> code;
+	int occurence;
+	public HuffmanData(String tag, String term) {
 		this.tag = tag;
-		this.source = source;
-		this.code = "";
-		this.counter = 1;
-	}
-	public HuffmanData(String tag, String source, int counter) {
-		this.tag = tag;
-		this.source = source;
-		this.code = "";
-		this.counter = counter;
+		this.term = term;
+		this.code = new ArrayList<Boolean>();
+		this.occurence = 0;
 	}
 	@Override
 	public int compare(HuffmanData o1, HuffmanData o2) {
-		int n1 = o1.counter;
-		int n2 = o2.counter;
+		int n1 = o1.occurence;
+		int n2 = o2.occurence;
 		if(n1 < n2) {
 			return 1;
 		}

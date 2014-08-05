@@ -26,7 +26,7 @@ public class XmlParser extends DefaultHandler {
 	public void startElement(String uri, String localName, String qName, Attributes attributes) {
 		stream.print("<");
 		//stream.println(qName + " : " + this.parseData.get(qName).code);
-		stream.println(qName + " ");
+		stream.print(qName + " ");
 		int n = attributes.getLength();
 		for(int i = 0; i < n; ++i){
 			//stream.println(attributes.getLocalName(i) + " : " + this.parseData.get(attributes.getLocalName(i)).code);
@@ -34,6 +34,7 @@ public class XmlParser extends DefaultHandler {
 			stream.print(attributes.getLocalName(i));
 			stream.print("=");
 			stream.print(attributes.getValue(i));
+			stream.print(" ");
 		}
 		isFirstChild = true;
 	}

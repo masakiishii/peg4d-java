@@ -240,7 +240,7 @@ public class Main {
 		p.beginPeformStat();
 		Pego pego = p.parseNode(startPoint);
 		if(Huffman) {
-			Huffman h = new Huffman(fileName);
+			Huffman h = new Huffman();
 			h.encode(pego);
 		}
 		p.endPerformStat(pego);

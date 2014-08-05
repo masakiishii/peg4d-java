@@ -1,12 +1,13 @@
 package org.peg4d;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
-
-import javax.xml.parsers.*;
-
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -14,156 +15,227 @@ import java.util.Collections;
 import java.util.HashMap;
 
 public class Huffman {
-	String fileName;
-	HashMap<String, HashMap<String, HuffmanData>> data;
-	HashMap<String, HuffmanData> parseData = new HashMap<String, HuffmanData>();
-	ArrayList<HuffmanData> huffmandatalist = new ArrayList<HuffmanData>();
-	ArrayList<String> keyword = new ArrayList<String>();
-	int powsize;
+	HashMap<String, HuffmanData> huffmanData = new HashMap<String, HuffmanData>();
+	ArrayList<String> xmlKeyword = new ArrayList<String>();
+	ArrayList<HuffmanData> huffmanDataList = new ArrayList<HuffmanData>();
+	ArrayList<Boolean> encodeSource = new ArrayList<Boolean>();
 	
 	public void initXmlMap() {
-		HashMap<String, HuffmanData> hmd = new HashMap<String, HuffmanData>();
-		for(int i = 0; i < keyword.size(); i++) {
-			HuffmanData d = new HuffmanData("#default", keyword.get(i), Integer.MAX_VALUE);
-			hmd.put(keyword.get(i), d);
+		for(int i = 0; i < xmlKeyword.size(); i++) {
+			HuffmanData d = new HuffmanData("#default", xmlKeyword.get(i));
+			huffmanData.put(xmlKeyword.get(i), d);
 		}
-		data.put("#default", hmd);
 	}
 	
-	public Huffman(String fileName) {
-		this.fileName = fileName;
-		data = new HashMap<String, HashMap<String, HuffmanData>>();
-		keyword.add("<");
-		keyword.add(">");
-		keyword.add("/>");
-		keyword.add("=");
+	public Huffman() {
+		xmlKeyword.add(" ");
+		xmlKeyword.add("\n");
+		xmlKeyword.add("\t");
+		xmlKeyword.add("<");
+		xmlKeyword.add("</");
+		xmlKeyword.add("<!--");
+		xmlKeyword.add(">");
+		xmlKeyword.add("/>");
+		xmlKeyword.add("-->");
+		xmlKeyword.add("=");
+		xmlKeyword.add("\"");
 		this.initXmlMap();
 	}
 	
-	public Pego traverseNode(Pego pego) {
-		if(pego.size() == 0) {
-			String key = pego.tag;
-			String value = pego.getText();
-			if(!this.data.containsKey(key)) {
-				HashMap<String, HuffmanData> hm = new HashMap<String, HuffmanData>();
-				HuffmanData hd = new HuffmanData(key, value);
-				hm.put(value, hd);
-				data.put(key, hm);
-			}
-			else {
-				HashMap<String, HuffmanData> hm = this.data.get(key);
-				if(hm.containsKey(value)) {
-					hm.get(value).counter++;
+	private void parse(Pego pego) {
+		String s = ((StringSource)(pego.source)).sourceText;
+		for(int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			switch(c) {
+			case ' ': case '\n': case '\t': case '=': case '"':
+				this.huffmanData.get(String.valueOf(c)).occurence++;
+				break;
+			case '<':
+				if(s.charAt(i+1) == '/') {
+					this.huffmanData.get("</").occurence++;
+					i++;
+				}
+				else if(s.charAt(i+1) == '!') {
+					this.huffmanData.get("<!--").occurence++;
+					i = i + 2;
+					while(s.charAt(i) == '-') i++;
 				}
 				else {
-					HuffmanData hd = new HuffmanData(key, value);
-					hm.put(value, hd);
-					data.put(key, hm);
+					this.huffmanData.get("<").occurence++;
 				}
+				break;
+			case '>':
+				if(s.charAt(i-1) == '/') {
+					this.huffmanData.get("/>").occurence++;
+				}
+				else {
+					this.huffmanData.get(">").occurence++;
+				}
+				break;
+			case '-':
+				if(s.charAt(i+1) == '-' && s.charAt(i+2) == '>') {
+					this.huffmanData.get("-->").occurence++;
+					i = i + 2;
+				}
+				else {
+					continue;
+				}
+				break;
+			default:
+				break;
 			}
-			System.out.println("This node is end node: " + "tag: " + pego.tag + ", test: " + pego.getText());
-			return null;
+		}
+	}
+
+	private void traverseNode(Pego pego) {
+		if(pego.size() == 0) {
+			String key = pego.getText();
+			if(!this.huffmanData.containsKey(key)) {
+				HuffmanData value = new HuffmanData(pego.tag, pego.getText());
+				value.occurence++;
+				this.huffmanData.put(key, value);
+			}
+			else {
+				this.huffmanData.get(key).occurence++;
+			}
 		}
 		for(int i = 0; i < pego.size(); i++) {
 			traverseNode(pego.AST[i]);
 		}
-		return null;
 	}
 
-	public void setList() {
-		for(String key : this.data.keySet()) {
-			HashMap<String, HuffmanData> hm = this.data.get(key);
-			for(String _key : hm.keySet()) {
-				System.out.println("_key    = " + _key);
-				System.out.println("counter = " + hm.get(_key).counter);
-				this.huffmandatalist.add(hm.get(_key));
+	private void showCode(ArrayList<Boolean> code) {
+		for(int i = 0; i < code.size(); i++) {
+			if(code.get(i).equals(true)) {
+				System.out.print("1");
+			}
+			else {
+				System.out.print("0");
 			}
 		}
 	}
+	
+	private void showMap () {
+		for(String key : this.huffmanData.keySet()) {
+			System.out.println("======================================================");
+			System.out.println("key: " + key);
+			System.out.println("tag: " + this.huffmanData.get(key).tag);
+			System.out.println("term: "  + this.huffmanData.get(key).term);
+			System.out.println("occurence: "  + this.huffmanData.get(key).occurence);
+			System.out.print("code: ");
+			showCode(this.huffmanData.get(key).code);
+			System.out.println();
+		}
+	}
+	private void showList () {
+		for(int i = 0; i < this.huffmanDataList.size(); i++) {
+			System.out.println("======================================================");
+			System.out.println("tag: " + this.huffmanDataList.get(i).tag);
+			System.out.println("term: "  + this.huffmanDataList.get(i).term);
+			System.out.println("occurence: "  + this.huffmanDataList.get(i).occurence);
+			System.out.print("code: ");
+			showCode(this.huffmanDataList.get(i).code);
+			System.out.println();
+		}
+	}
 
-	public void setBit() {
-		System.out.println(this.huffmandatalist.size());
-		int i = 0;
-		int listsize = this.huffmandatalist.size();
-		int buffer;
-		while(true) {
-			buffer = listsize >> i;
-			if(buffer == 0) {
-				break;
-			}
-			i++;
-		}
-		this.powsize = i;
-	}
-	
-	public void sortList() {
-		System.out.println("-----------------<<< sortList >>-----------------------");
-		Collections.sort(this.huffmandatalist, new HuffmanData(null, null));
-		for(int i = 0; i < this.huffmandatalist.size(); i++) {
-			HuffmanData d = this.huffmandatalist.get(i);
-			System.out.println("tag: " + d.tag);
-			System.out.println("source: " + d.source);
-			System.out.println("counter: " + d.counter);
+	private void setList() {
+		for(String key : this.huffmanData.keySet()) {
+			this.huffmanDataList.add(this.huffmanData.get(key));
 		}
 	}
-//	HashMap<String, HashMap<String, HuffmanData>> data;
-//	ArrayList<HuffmanData> huffmandatalist = new ArrayList<HuffmanData>();
-//	ArrayList<String> keyword = new ArrayList<String>();
-//	int powsize;
-	
-	public void coding() {
-		System.out.println("----------------<<< coding >>>----------------------");
-		int size = huffmandatalist.size();
-		huffmandatalist.get(0).code += "0";
+
+	private void sortList() {
+		Collections.sort(this.huffmanDataList, new HuffmanData(null, null));
+	}
+
+	private void coding() {
+		int size = this.huffmanDataList.size();
+		this.huffmanDataList.get(0).code.add(false);
 		for(int i = 1; i < size; i++) {
 			for(int j = 0; j < i; j++) {
-				huffmandatalist.get(i).code += "1";
+				this.huffmanDataList.get(i).code.add(true);
 			}
-			huffmandatalist.get(i).code += "0";
+			if(i != size-1) {
+				this.huffmanDataList.get(i).code.add(false);
+			}
+			else {
+				continue;
+			}
 		}
-		for(int i = 0; i < this.huffmandatalist.size(); i++) {
-			HuffmanData d = this.huffmandatalist.get(i);
-			System.out.println("tag: " + d.tag);
-			System.out.println("source: " + d.source);
-			System.out.println("counter: " + d.counter);
-			System.out.println("code: " + d.code);
+	}
+
+	private boolean isKeyword(char literal) {
+		switch(literal) {
+		case ' ': case '\n': case '\t': case '<':
+		case '>': case '/':  case '-':  case '=':case '"':
+			return true;
+		default:
+			return false;
 		}
 	}
 	
-	public void xmlparser() {
-		try {
-			XmlParser converter = new XmlParser(this.parseData);
-			PrintStream fileoutStream = null;
-			//fileoutStream = new PrintStream("/output.xml");
-			converter.setPrintStream(fileoutStream);
-			converter.setPrintStream(System.out);
-			SAXParserFactory spfactory = SAXParserFactory.newInstance();
-			SAXParser parser = spfactory.newSAXParser();
-			parser.parse(new File(this.fileName), converter);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void rehash() {
-		for(String key : this.data.keySet()) {
-			HashMap<String, HuffmanData> hm = this.data.get(key);
-			for(String _key : hm.keySet()) {
-				this.parseData.put(_key, hm.get(_key));
+	private void output(Pego pego) {
+		String s = ((StringSource)(pego.source)).sourceText;
+		for(int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			switch(c) {
+			case ' ': case '\n': case '\t': case '=': case '"':
+				this.encodeSource.addAll(this.huffmanData.get(String.valueOf(c)).code);
+				break;
+			case '<':
+				if(s.charAt(i+1) == '/') {
+					this.encodeSource.addAll(this.huffmanData.get("</").code);
+					i++;
+				}
+				else if(s.charAt(i+1) == '!') {
+					this.encodeSource.addAll(this.huffmanData.get("<!--").code);
+					i = i + 2;
+					while(s.charAt(i) == '-') i++;
+				}
+				else {
+					this.encodeSource.addAll(this.huffmanData.get("<").code);
+				}
+				break;
+			case '>':
+				if(s.charAt(i-1) == '/') {
+					this.encodeSource.addAll(this.huffmanData.get("/>").code);
+				}
+				else {
+					this.encodeSource.addAll(this.huffmanData.get(">").code);
+				}
+				break;
+			case '-':
+				if(s.charAt(i+1) == '-' && s.charAt(i+2) == '>') {
+					this.encodeSource.addAll(this.huffmanData.get("-->").code);
+					i = i + 2;
+				}
+				else {
+					continue;
+				}
+				break;
+			default:
+				StringBuffer sb = new StringBuffer();
+				while(!isKeyword(s.charAt(i))) {
+					sb.append(s.charAt(i));
+					i++;
+				}
+				if(this.huffmanData.containsKey(sb.toString())) {
+					this.encodeSource.addAll(this.huffmanData.get(sb.toString()).code);
+				}
+				break;
 			}
 		}
 	}
 	
 	public void encode(Pego pego) {
-		this.traverseNode(pego);
-		System.out.println(this.data);
-		this.setList();
-		this.setBit();
-		this.sortList();
-		this.coding();
-		this.rehash();
-		this.xmlparser();
-		System.out.println(Math.pow(2, this.powsize));
+		parse(pego);
+		traverseNode(pego);
+		setList();
+		sortList();
+		coding();
+		//showList();
+		output(pego);
 		System.out.println("=======================================");
 	}
 }
