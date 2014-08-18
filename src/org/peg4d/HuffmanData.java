@@ -8,12 +8,14 @@ public class HuffmanData implements Comparator<HuffmanData> {
 	String             term;
 	ArrayList<Boolean> code;
 	int                occurence;
+
 	public HuffmanData(String tag, String term) {
 		this.tag = tag;
 		this.term = term;
 		this.code = new ArrayList<Boolean>();
 		this.occurence = 0;
 	}
+	
 	@Override
 	public int compare(HuffmanData o1, HuffmanData o2) {
 		int n1 = o1.occurence;

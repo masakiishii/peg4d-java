@@ -11,6 +11,7 @@ public class Huffman {
 	ArrayList<String>            xmlKeyword      = new ArrayList<String>();
 	ArrayList<HuffmanData>       huffmanDataList = new ArrayList<HuffmanData>();
 	ArrayList<Boolean>           encodeSource    = new ArrayList<Boolean>();
+	int                          codeSize;
 	
 	public void initXmlMap() {
 		for(int i = 0; i < xmlKeyword.size(); i++) {
@@ -138,6 +139,7 @@ public class Huffman {
 		for(String key : this.huffmanData.keySet()) {
 			this.huffmanDataList.add(this.huffmanData.get(key));
 		}
+		this.codeSize = this.huffmanDataList.size() - 1;
 	}
 
 	private void sortList() {
@@ -148,6 +150,7 @@ public class Huffman {
 		int size = this.huffmanDataList.size();
 		this.huffmanDataList.get(0).code.add(false);
 		for(int i = 1; i < size; i++) {
+			System.out.println(this.huffmanDataList.get(i).term);
 			for(int j = 0; j < i; j++) {
 				this.huffmanDataList.get(i).code.add(true);
 			}
@@ -163,7 +166,7 @@ public class Huffman {
 	private boolean isKeyword(char literal) {
 		switch(literal) {
 		case ' ': case '\n': case '\t': case '<':
-		case '>': case '/':  case '-':  case '=':case '"':
+		case '>': case '=':case '"':
 			return true;
 		default:
 			return false;
@@ -175,7 +178,7 @@ public class Huffman {
 		for(int i = 0; i < s.length(); i++) {
 			char c = s.charAt(i);
 			switch(c) {
-			case ' ': case '\n': case '\t': case '=': case '"':
+			case ' ': case '\n': case '\t': case '=' :
 				this.encodeSource.addAll(this.huffmanData.get(String.valueOf(c)).code);
 				break;
 			case '<':
@@ -208,6 +211,18 @@ public class Huffman {
 				else {
 					continue;
 				}
+				break;
+			case '"':
+				this.encodeSource.addAll(this.huffmanData.get(String.valueOf(c)).code);
+				StringBuffer name = new StringBuffer();
+				while(s.charAt(++i) != '"') {
+					name.append(s.charAt(i));
+				}
+				System.out.println(name.toString());
+				if(this.huffmanData.containsKey(name.toString())) {
+					this.encodeSource.addAll(this.huffmanData.get(name.toString()).code);
+				}
+				this.encodeSource.addAll(this.huffmanData.get(String.valueOf(c)).code);
 				break;
 			default:
 				StringBuffer sb = new StringBuffer();
@@ -266,18 +281,32 @@ public class Huffman {
 	}
 	
 	private void parseBinaryData(ArrayList<Boolean> decodeData) {
-		showCode(decodeData);
-		System.out.println("");
-		StringBuffer buf = new StringBuffer();
-		for(int i = 0; i < decodeData.size(); i++) {
-			if(decodeData.get(i)) {
-				buf.append("1");
+		try {
+			showCode(decodeData);
+			System.out.println("");
+			StringBuffer buf = new StringBuffer();
+			File file = new File("decodedbuild.xml");
+			PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+			
+			for(int i = 0; i < decodeData.size(); i++) {
+				if(decodeData.get(i)) {
+					buf.append("1");
+					if(buf.length() == this.codeSize) {
+						System.out.print(this.decodeMap.get(buf.toString()));
+						pw.print(this.decodeMap.get(buf.toString()));
+						buf.delete(0, buf.length());
+					}
+				}
+				else {
+					buf.append("0");
+					System.out.print(this.decodeMap.get(buf.toString()));
+					pw.print(this.decodeMap.get(buf.toString()));
+					buf.delete(0, buf.length());
+				}
 			}
-			else {
-				buf.append("0");
-				System.out.print(this.decodeMap.get(buf.toString()));
-				buf.delete(0, buf.length());
-			}
+			pw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
