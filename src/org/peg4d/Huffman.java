@@ -1,24 +1,16 @@
 package org.peg4d;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
 public class Huffman {
-	HashMap<String, HuffmanData> huffmanData = new HashMap<String, HuffmanData>();
-	ArrayList<String> xmlKeyword = new ArrayList<String>();
-	ArrayList<HuffmanData> huffmanDataList = new ArrayList<HuffmanData>();
-	ArrayList<Boolean> encodeSource = new ArrayList<Boolean>();
+	HashMap<String, HuffmanData> huffmanData     = new HashMap<String, HuffmanData>();
+	HashMap<String, String>      decodeMap       = new HashMap<String, String>();
+	ArrayList<String>            xmlKeyword      = new ArrayList<String>();
+	ArrayList<HuffmanData>       huffmanDataList = new ArrayList<HuffmanData>();
+	ArrayList<Boolean>           encodeSource    = new ArrayList<Boolean>();
 	
 	public void initXmlMap() {
 		for(int i = 0; i < xmlKeyword.size(); i++) {
@@ -43,6 +35,8 @@ public class Huffman {
 	}
 	
 	private void parse(Pego pego) {
+		System.out.println(pego.source);
+		System.out.println(pego.source.getClass());
 		String s = ((StringSource)(pego.source)).sourceText;
 		for(int i = 0; i < s.length(); i++) {
 			char c = s.charAt(i);
@@ -90,6 +84,7 @@ public class Huffman {
 	private void traverseNode(Pego pego) {
 		if(pego.size() == 0) {
 			String key = pego.getText();
+			System.out.println("this node is : " + pego.tag);
 			if(!this.huffmanData.containsKey(key)) {
 				HuffmanData value = new HuffmanData(pego.tag, pego.getText());
 				value.occurence++;
@@ -106,7 +101,7 @@ public class Huffman {
 
 	private void showCode(ArrayList<Boolean> code) {
 		for(int i = 0; i < code.size(); i++) {
-			if(code.get(i).equals(true)) {
+			if(code.get(i)) {
 				System.out.print("1");
 			}
 			else {
@@ -216,15 +211,94 @@ public class Huffman {
 				break;
 			default:
 				StringBuffer sb = new StringBuffer();
-				while(!isKeyword(s.charAt(i))) {
-					sb.append(s.charAt(i));
-					i++;
+				int pos = i;
+				while(!isKeyword(s.charAt(pos))) {
+					sb.append(s.charAt(pos));
+					pos++;
 				}
+				if(i != pos) i = pos - 1;
+				System.out.println(sb.toString());
 				if(this.huffmanData.containsKey(sb.toString())) {
 					this.encodeSource.addAll(this.huffmanData.get(sb.toString()).code);
 				}
 				break;
 			}
+		}
+	}
+
+	private void converter(ArrayList<Boolean> decodeData, int source) {
+		int counter = 0;
+		int flag;
+		while(counter != 8) {
+			flag = source & (1 << (7 - counter++));
+			if(flag > 0) {
+				decodeData.add(true);
+			}
+			else {
+				decodeData.add(false);
+			}
+		}
+	}
+	
+	private void outputBinaryData(String file) {
+		try {
+			BitOutputStream out = new BitOutputStream(new FileOutputStream(file));
+			out.write(this.encodeSource);
+			out.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void readBinaryData(String file) {
+		try {
+			BitInputStream in = new BitInputStream(new FileInputStream(file));
+			ArrayList<Boolean> decodeData = new ArrayList<Boolean>();
+			int c;
+			while((c = in.read()) != -1) {
+				converter(decodeData, c);
+			}
+			parseBinaryData(decodeData);
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void parseBinaryData(ArrayList<Boolean> decodeData) {
+		showCode(decodeData);
+		System.out.println("");
+		StringBuffer buf = new StringBuffer();
+		for(int i = 0; i < decodeData.size(); i++) {
+			if(decodeData.get(i)) {
+				buf.append("1");
+			}
+			else {
+				buf.append("0");
+				System.out.print(this.decodeMap.get(buf.toString()));
+				buf.delete(0, buf.length());
+			}
+		}
+	}
+
+	private String convertBooleanArrayListToString(ArrayList<Boolean> code) {
+		StringBuffer buf = new StringBuffer();
+		for(int i = 0; i < code.size(); i++) {
+			if(code.get(i)) {
+				buf.append("1");
+			}
+			else {
+				buf.append("0");
+			}
+		}
+		return buf.toString();
+	}
+	
+	private void buildDecodeMap() {
+		for(int i = 0; i < this.huffmanDataList.size(); i++) {
+			String key   = convertBooleanArrayListToString(this.huffmanDataList.get(i).code);
+			String value = this.huffmanDataList.get(i).term;
+			this.decodeMap.put(key, value);
 		}
 	}
 	
@@ -234,8 +308,15 @@ public class Huffman {
 		setList();
 		sortList();
 		coding();
-		//showList();
+		showList();
 		output(pego);
+		showCode(this.encodeSource);
+		buildDecodeMap();
+		outputBinaryData("output.txt");
+		System.out.println("=======================================");
+		readBinaryData("output.txt");
+		System.out.println("=======================================");
+		
 		System.out.println("=======================================");
 	}
 }

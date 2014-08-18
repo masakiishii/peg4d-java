@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 public class HuffmanData implements Comparator<HuffmanData> {
-	String tag;
-	String term;
+	String             tag;
+	String             term;
 	ArrayList<Boolean> code;
-	int occurence;
+	int                occurence;
 	public HuffmanData(String tag, String term) {
 		this.tag = tag;
 		this.term = term;
