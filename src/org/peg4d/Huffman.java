@@ -188,8 +188,9 @@ public class Huffman {
 				}
 				else if(s.charAt(i+1) == '!') {
 					this.encodeSource.addAll(this.huffmanData.get("<!--").code);
-					i = i + 2;
-					while(s.charAt(i) == '-') i++;
+					i = i + 3;
+					//while(s.charAt(i) == '-') i++;
+					for(;s.charAt(i) == '-' && s.charAt(i+1) == '-' && s.charAt(i+2) == '>'; i++){}
 				}
 				else {
 					this.encodeSource.addAll(this.huffmanData.get("<").code);
@@ -198,6 +199,9 @@ public class Huffman {
 			case '>':
 				if(s.charAt(i-1) == '/') {
 					this.encodeSource.addAll(this.huffmanData.get("/>").code);
+				}
+				else if(s.charAt(i-1) == '-' && s.charAt(i-2) == '-') {
+					this.encodeSource.addAll(this.huffmanData.get("-->").code);
 				}
 				else {
 					this.encodeSource.addAll(this.huffmanData.get(">").code);
