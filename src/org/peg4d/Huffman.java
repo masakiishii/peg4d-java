@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 public class Huffman {
 	HashMap<String, HuffmanData> huffmanData     = new HashMap<String, HuffmanData>();
+	HashMap<String, String>      encodeMap       = new HashMap<String, String>();
 	HashMap<String, String>      decodeMap       = new HashMap<String, String>();
 	ArrayList<String>            xmlKeyword      = new ArrayList<String>();
 	ArrayList<HuffmanData>       huffmanDataList = new ArrayList<HuffmanData>();
@@ -100,7 +101,7 @@ public class Huffman {
 		}
 	}
 
-	private void showCode(ArrayList<Boolean> code) {
+	public void showCode(ArrayList<Boolean> code) {
 		for(int i = 0; i < code.size(); i++) {
 			if(code.get(i)) {
 				System.out.print("1");
@@ -123,14 +124,14 @@ public class Huffman {
 			System.out.println();
 		}
 	}
-	private void showList () {
-		for(int i = 0; i < this.huffmanDataList.size(); i++) {
+	public void showList (ArrayList<HuffmanData> list) {
+		for(int i = 0; i < list.size(); i++) {
 			System.out.println("======================================================");
-			System.out.println("tag: " + this.huffmanDataList.get(i).tag);
-			System.out.println("term: "  + this.huffmanDataList.get(i).term);
-			System.out.println("occurence: "  + this.huffmanDataList.get(i).occurence);
+			System.out.println("tag: " + list.get(i).tag);
+			System.out.println("term: "  + list.get(i).term);
+			System.out.println("occurence: "  + list.get(i).occurence);
 			System.out.print("code: ");
-			showCode(this.huffmanDataList.get(i).code);
+			showCode(list.get(i).code);
 			System.out.println();
 		}
 	}
@@ -327,12 +328,24 @@ public class Huffman {
 		return buf.toString();
 	}
 	
-	private void buildDecodeMap() {
+	private void buildMap() {
 		for(int i = 0; i < this.huffmanDataList.size(); i++) {
 			String key   = convertBooleanArrayListToString(this.huffmanDataList.get(i).code);
 			String value = this.huffmanDataList.get(i).term;
 			this.decodeMap.put(key, value);
+			this.encodeMap.put(value, key);
 		}
+	}
+	
+	public ArrayList<HuffmanData> getHuffmanDataList(String tag) {
+		ArrayList<HuffmanData> datalist = new ArrayList<HuffmanData>();
+		for(int i = 0; i < this.huffmanDataList.size(); i++) {
+			HuffmanData hd = this.huffmanDataList.get(i);
+			if(hd.tag.equals(tag)) {
+				datalist.add(hd);
+			}
+		}
+		return datalist;
 	}
 	
 	public void encode(Pego pego) {
@@ -341,15 +354,17 @@ public class Huffman {
 		setList();
 		sortList();
 		coding();
-		showList();
+		showList(this.huffmanDataList);
 		output(pego);
 		showCode(this.encodeSource);
-		buildDecodeMap();
+		buildMap();
 		outputBinaryData("output.txt");
 		System.out.println("=======================================");
 		readBinaryData("output.txt");
-		System.out.println("=======================================");
+		System.out.println("==================<<< Recompile >>>=====================");
 		
+		Recompiler recompiler = new Recompiler(this, "sample/xml.peg", "recompiled.peg");
+		recompiler.generatePegFile();
 		System.out.println("=======================================");
 	}
 }
