@@ -7,98 +7,55 @@ import java.util.Map;
 
 
 public class DBBuilder {
-	class ColumnData {
-		
-		private String value         = null;
-		private String tag           = null;
-		private String fullpath      = null;
-		private ParsingObject parent = null;
-		private int parentorder      = -1;
-		private int depthlevel       = -1;
-		
-		public ColumnData(ParsingObject node, int parentorder, int depthlevel, String fullpath) {
-			this.value       = node.getText();
-			this.tag         = node.getTag().toString();
-			this.parent      = node.getParent();
-			this.parentorder = parentorder;
-			this.depthlevel  = depthlevel;
-			this.fullpath    = fullpath;
+
+	class TableData {
+		private String tag   = null;
+		private String value = null;
+		private int ltpos    = -1;
+		private int rtpos    = -1;
+		private int depth    = -1;
+		public TableData(ParsingObject node, int depth, int currentpos) {
+			this.tag   = node.getTag().toString();
+			this.value = node.size() == 0 ? node.getText() : null;
+			this.ltpos = currentpos;
+			this.depth = depth;
+		}
+		public void setRightPostion(int rtpos) {
+			this.rtpos = rtpos;
 		}
 	}
 	
-	private Map<String, ArrayList<ColumnData>> mapdata = null;
-	private LinkedList<String> pathstack               = null;
-
+	private int currentpos = -1;
+	private LinkedList<TableData> datalist = null;
 	public DBBuilder() {
-		this.mapdata   = new HashMap<String, ArrayList<ColumnData>>();
-		this.pathstack = new LinkedList<String>();
+		this.currentpos = 1;
+		this.datalist   = new LinkedList<TableData>();
 	}
 	
-	private String buildFullPath(LinkedList<String> stack) {
-		StringBuilder fullpath = new StringBuilder();
-		for(int i = stack.size() - 1; i >= 0; i--) {
-			fullpath.append(stack.get(i) + "/");
-		}
-		return fullpath.toString();
-	}
-	
-	private void buildMap(ParsingObject node, int parentorder, int depthlevel) {
-		String nodetag  = node.getTag().toString();
-		String fullpath = this.buildFullPath(this.pathstack);
-		ColumnData columndata = new ColumnData(node, parentorder, depthlevel, fullpath);
-		if(this.mapdata.containsKey(nodetag)) {
-			this.mapdata.get(nodetag).add(columndata);
-		}
-		else {
-			ArrayList<ColumnData> columndatalist = new ArrayList<ColumnData>();
-			columndatalist.add(columndata);
-			this.mapdata.put(nodetag, columndatalist);
-		}	
-	}
-	
-	private void parseAST(ParsingObject node, int parentorder, int depthlevel) {
+	private void parseAST(ParsingObject node, int depth) {
 		if(node == null) return;
-		this.pathstack.push(node.getTag().toString());
-		//this.showPathStack(this.pathstack, parentorder);
+		TableData tabledata = new TableData(node, depth, this.currentpos++);
 		for(int index = 0; index < node.size(); index++) {
-			if(node.get(index).size() == 0) { 
-				this.buildMap(node.get(index), parentorder, depthlevel);
-			}
-			else {
-				this.parseAST(node.get(index), index, depthlevel + 1);
-			}
+			this.parseAST(node.get(index), depth + 1);
 		}
-		this.pathstack.pop();
+		tabledata.setRightPostion(this.currentpos++);
+		this.datalist.add(tabledata);
 	}
-	
-	private void showPathStack(LinkedList<String> stack, int parentorder) {
-		System.out.print("path: ");
-		for(int i = stack.size() - 1; i >= 0; i--) {
-			System.out.print(stack.get(i) + "/");
-		}
-		System.out.print(", parentorder: " + parentorder);
-		System.out.println("");
-	}
-
-	private void showMap() {
-		for(String key : this.mapdata.keySet()) {
-			ArrayList<ColumnData> d = this.mapdata.get(key);
-			int id = 0;
-			System.out.println(" ID | #" + key + " |      fullpath      | parentorder");
-			System.out.println("================================================");
-			for(int i = 0; i < d.size(); i++) {
-				id = i + 1;
-				System.out.print(" " + id + "  | ");
-				System.out.print(" " + d.get(i).value + " | ");
-				System.out.print(" " + d.get(i).fullpath + " | ");
-				System.out.println(" " + d.get(i).parentorder + " | ");
-			}
+	private void showDataList() {
+		System.out.println(" Tag  |  Value |  lt |  rt  |  depth");
+		System.out.println("=====================================");
+		for(int i = 0; i < this.datalist.size(); i++) {
+			System.out.print(this.datalist.get(i).tag   + " | ");
+			System.out.print(this.datalist.get(i).value + " | ");
+			System.out.print(this.datalist.get(i).ltpos + " | ");
+			System.out.print(this.datalist.get(i).rtpos + " | ");
+			System.out.println(this.datalist.get(i).depth);
 		}
 	}
 	
 	public void build(ParsingObject root) {
-		this.parseAST(root, 0, 0);
-		showMap();
+		this.parseAST(root, 0);
+		this.showDataList();
 		System.out.println("----------------------------------");
 	}
 }
