@@ -60,6 +60,9 @@ public class Main {
 	
 	// --verbose:stat
 	public static int     StatLevel = -1;
+	
+	// --dbbuilder
+	private static boolean DBBuilder = false;
 
 	// --static => false
 	public static String  ParserName = null;
@@ -141,6 +144,9 @@ public class Main {
 			}
 			else if (argument.equals("-a")) {
 				DiskMode = true;
+			}
+			else if (argument.equals("--dbbuilder")) {
+				DBBuilder = true;
 			}
 			else if(argument.startsWith("--test")) {
 				TestMode = true;
@@ -291,6 +297,10 @@ public class Main {
 		}
 		p.beginPeformStat();
 		ParsingObject pego = p.parse(startPoint);
+		if(DBBuilder) {
+			DBBuilder builder = new DBBuilder();
+			builder.build(pego);
+		}
 		if(p.isFailure()) {
 			p.showPosition("syntax error", p.fpos);
 			return;
