@@ -98,9 +98,10 @@ public class DBBuilder {
 			msg = "Success!!";
 			Connection con   = DriverManager.getConnection( "jdbc:mysql://localhost:3306/peg4dDB", "masaki","masaki");
 			Statement  stmt  = con.createStatement();
-			String     table = "parsingObjectDB";
+			//String     table = "parsingObjectDB";
+			String     table = "json";
 			String     sql   = "CREATE TABLE " + table + "( "
-					+ "tag VARCHAR(16),"
+					+ "tag VARCHAR(64),"
 					+ "value VARCHAR(256),"
 					+ "lt INT PRIMARY KEY,"
 					+ "rt INT,"

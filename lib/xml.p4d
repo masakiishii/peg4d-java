@@ -4,7 +4,12 @@
 export
         = Xml
 File
-	= PROLOG? SPC* DTD? SPC* Xml SPC*
+	= PROLOG? S* DTD? SPC* Xml S*
+
+S
+        = [ \t\r\n]
+
+
 Chunk
 	= Xml
 
