@@ -53,12 +53,50 @@ public class DBBuilder {
 			}
 		}
 	}
-
 	
-	private void createSQlStmt(ParsingObject node) {
+	private void executeInsertSQLStmt(String sql) {
+		String msg = "";
+		try {
+			msg = "Success!!";
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection con  = DriverManager.getConnection( "jdbc:mysql://localhost:3306/peg4dDB", "masaki","masaki");
+			Statement  stmt = con.createStatement();
+			stmt.execute(sql);
+			stmt.close();
+		} catch (ClassNotFoundException e){
+			msg = "Fail!!";
+		} catch (Exception e){
+			System.out.println("Exception：" + e);
+		}
+		System.out.println(msg);
+	}
+	
+	private void createSQLStmt(ParsingObject node) {
 		String tag = node.getTag().toString();
 		if(this.schemadata.containsKey(tag)) {
+			String pre = "INSERT INTO " + tag + " VALUES (" + "'" + node.getId() + "', ";
+			String sql = pre;
 			Schema schema = this.schemadata.get(tag);
+			ArrayList<String> schemafieldlist = schema.getfieldlist();
+			for(int i = 0; i < schemafieldlist.size(); i++) {
+				String schemafield = schemafieldlist.get(i);
+				ArrayList<String> valuelist = new ArrayList<String>();
+				for(int j = 0; j < node.size(); j++) {
+					ParsingObject childnode = node.get(j);
+					if(schemafield.equals(childnode.getTag().toString())) {
+						if(childnode.size() > 0) {
+							valuelist.add(String.valueOf(childnode.getId()));
+						}
+						else {
+							valuelist.add(childnode.getText());
+						}
+					}
+				}
+				sql += "'" + valuelist.toString() + "'";
+				sql += (i != schemafieldlist.size() - 1) ? ", " : ");";
+			}
+			this.executeInsertSQLStmt(sql);
+			//System.out.println(sql);
 		}
 	}
 	
@@ -68,7 +106,7 @@ public class DBBuilder {
 		queue.offer(root);
 		while(!queue.isEmpty()) {
 			ParsingObject node = queue.poll();
-			this.createSQlStmt(node);
+			this.createSQLStmt(node);
 			for(int index = 0; index < node.size(); index++) {
 				queue.offer(node.get(index));
 			}
@@ -83,7 +121,8 @@ public class DBBuilder {
 			Connection con  = DriverManager.getConnection( "jdbc:mysql://localhost:3306/peg4dDB", "masaki","masaki");
 			Statement  stmt = con.createStatement();
 			for(String table : this.schemadata.keySet()) {
-				String sql = "CREATE TABLE " + table + "( ";
+				String prime = table + "ID";
+				String sql   = "CREATE TABLE " + table + "(" + prime + " VARCHAR(256), ";
 				ArrayList<String> fieldlist = this.schemadata.get(table).getfieldlist();
 				String field = "";
 				for(int i = 0; i < fieldlist.size(); i++) {
@@ -108,18 +147,7 @@ public class DBBuilder {
 	public void build(ParsingObject root) {
 		this.buildDataBaseSchema(root, 1);
 		this.generateSchemaSQL();
-		
-		//this.insertDataBase(root);
-		ArrayList<String> array = this.schemadata.get("Element").getfieldlist();
-		System.out.println("table: " + this.schemadata.get("Element").getPrimaryField());
-		for(int i = 0; i < array.size(); i++) {
-			System.out.println(array.get(i));
-		}
-		array = this.schemadata.get("Attr").getfieldlist();
-		System.out.println("table: " + this.schemadata.get("Attr").getPrimaryField());
-		for(int i = 0; i < array.size(); i++) {
-			System.out.println(array.get(i));
-		}
+		this.insertDataBase(root);
 		System.out.println("-----------------------------------------");
 	}
 }
