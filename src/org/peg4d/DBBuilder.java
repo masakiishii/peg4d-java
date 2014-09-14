@@ -8,12 +8,11 @@ import java.sql.*;
 
 public class DBBuilder {
 	
-	private HashMap<String, Schema>         schemadata = null;
+	private HashMap<String, Schema> schemadata = null;
 	
 	public DBBuilder() {
 		schemadata = new HashMap<String, Schema>();
 	}
-	
 
 	private void buildPrimeSchema(ParsingObject node) {
 		String tag = node.getTag().toString();
@@ -71,10 +70,20 @@ public class DBBuilder {
 		System.out.println(msg);
 	}
 	
+	private String concatList(ArrayList<String> value) {
+		String ret = "";
+		for(int i = 0; i < value.size(); i++) {
+			ret += value.get(i);
+			if(i != value.size() - 1) ret += ",";
+		}
+		return ret;
+	}
+	
 	private void createSQLStmt(ParsingObject node) {
 		String tag = node.getTag().toString();
 		if(this.schemadata.containsKey(tag)) {
-			String pre = "INSERT INTO " + tag + " VALUES (" + "'" + node.getId() + "', ";
+			String tablename = tag + "Table";
+			String pre = "INSERT INTO " + tablename + " VALUES (" + "'" + node.getId() + "', ";
 			String sql = pre;
 			Schema schema = this.schemadata.get(tag);
 			ArrayList<String> schemafieldlist = schema.getfieldlist();
@@ -92,11 +101,16 @@ public class DBBuilder {
 						}
 					}
 				}
-				sql += "'" + valuelist.toString() + "'";
+				if(valuelist.size() == 1) {
+					sql += "'" + valuelist.get(0) + "'";
+				}
+				else {
+					String value = (valuelist.toString().length() > 128) ? "too long" : this.concatList(valuelist);
+					sql += "'" + value + "'";
+				}
 				sql += (i != schemafieldlist.size() - 1) ? ", " : ");";
 			}
 			this.executeInsertSQLStmt(sql);
-			//System.out.println(sql);
 		}
 	}
 	
@@ -121,12 +135,13 @@ public class DBBuilder {
 			Connection con  = DriverManager.getConnection( "jdbc:mysql://localhost:3306/peg4dDB", "masaki","masaki");
 			Statement  stmt = con.createStatement();
 			for(String table : this.schemadata.keySet()) {
-				String prime = table + "ID";
-				String sql   = "CREATE TABLE " + table + "(" + prime + " VARCHAR(256), ";
+				String prime     = table + "ID";
+				String tablename = table + "Table";
+				String sql   = "CREATE TABLE " + tablename + "(" + prime + " VARCHAR(64), ";
 				ArrayList<String> fieldlist = this.schemadata.get(table).getfieldlist();
 				String field = "";
 				for(int i = 0; i < fieldlist.size(); i++) {
-					field += fieldlist.get(i) + " VARCHAR(256)";
+					field += fieldlist.get(i) + " VARCHAR(128)";
 					if(i != fieldlist.size() - 1) {
 						field += ", ";
 					}
