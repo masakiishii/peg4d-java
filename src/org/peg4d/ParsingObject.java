@@ -8,6 +8,7 @@ public class ParsingObject {
 	private Object           value  = null;
 	ParsingObject            parent = null;
 	private ParsingObject    AST[] = null;
+	private int              id = -1;
 
 	ParsingObject(ParsingTag tag, ParsingSource source, long pospeg) {
 		this.tag        = tag;
@@ -59,6 +60,14 @@ public class ParsingObject {
 
 	void setValue(Object value) {
 		this.value = value;
+	}
+	
+	void setId(int id) {
+		this.id = id;
+	}
+	
+	int getId() {
+		return this.id;
 	}
 	
 	public final boolean is(int tagId) {

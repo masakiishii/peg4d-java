@@ -4,7 +4,7 @@
 export
         = Xml
 File
-	= PROLOG? S* DTD? SPC* Xml S*
+	= PROLOG? S* DTD? S* Xml S*
 
 S
         = [ \t\r\n]

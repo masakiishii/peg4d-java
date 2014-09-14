@@ -1,114 +1,101 @@
 package org.peg4d;
 
 import java.util.ArrayList;
-
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.HashMap;
-import java.util.Map;
-
+import java.util.Queue;
 import java.sql.*;
 
 public class DBBuilder {
-
-	class TableData implements Comparator<TableData> {
-		private String tag   = null;
-		private String value = null;
-		private int ltpos    = -1;
-		private int rtpos    = -1;
-		private int depth    = -1;
-		public TableData() {
-		}
-		public TableData(ParsingObject node, int depth, int currentpos) {
-			this.tag   = node.getTag().toString();
-			this.value = (node.size() == 0 && node.getText().length() < 64) ? node.getText() : null;
-			this.ltpos = currentpos;
-			this.depth = depth;
-		}
-		public void setRightPostion(int rtpos) {
-			this.rtpos = rtpos;
-		}
-		@Override
-		public int compare(TableData data1, TableData data2) {
-			int ltpos1 = data1.ltpos;
-			int ltpos2 = data2.ltpos;
-			if(ltpos1 > ltpos2) {
-				return 1;
-			}
-			else if(ltpos1 == ltpos2) {
-				return 0;
-			}
-			else {
-				return -1;
-			}
-		}
-	}
 	
-	private int currentpos = -1;
-	private LinkedList<TableData> datalist = null;
+	private HashMap<String, Schema>         schemadata = null;
+	
 	public DBBuilder() {
-		this.currentpos = 1;
-		this.datalist   = new LinkedList<TableData>();
+		schemadata = new HashMap<String, Schema>();
 	}
 	
-	private void parseAST(ParsingObject node, int depth) {
-		if(node == null) return;
-		TableData tabledata = new TableData(node, depth, this.currentpos++);
-		for(int index = 0; index < node.size(); index++) {
-			this.parseAST(node.get(index), depth + 1);
-		}
-		tabledata.setRightPostion(this.currentpos++);
-		this.datalist.add(tabledata);
-	}
-	private void sortList() {
-		Collections.sort(this.datalist, new TableData());
-	}
-	private void showDataList() {
-		System.out.println(" Tag  |  Value |  lt |  rt  |  depth");
-		System.out.println("=====================================");
-		for(int i = 0; i < this.datalist.size(); i++) {
-			System.out.print(this.datalist.get(i).tag   + " | ");
-			System.out.print(this.datalist.get(i).value + " | ");
-			System.out.print(this.datalist.get(i).ltpos + " | ");
-			System.out.print(this.datalist.get(i).rtpos + " | ");
-			System.out.println(this.datalist.get(i).depth);
+
+	private void buildPrimeSchema(ParsingObject node) {
+		String tag = node.getTag().toString();
+		if(node.size() > 0 && !schemadata.containsKey(tag)) {
+			Schema schema = new Schema(tag);
+			this.schemadata.put(tag, schema);
 		}
 	}
 	
-	private void executeInsertSQL(String table, Statement stmt) {
-		try {
-			String pre = "INSERT INTO " + table + " VALUES ";
-			String sql = "";
-			TableData td;
-			for(int index = 0; index < this.datalist.size(); index++) {
-				td = this.datalist.get(index);
-				sql = pre + "( '" + td.tag + "', '" + td.value + "', " + td.ltpos + ", " + td.rtpos + ", " + td.depth + ");";
-				stmt.execute(sql);
+	private void buildOtherSchema(ParsingObject node) {
+		ParsingObject parent = node.getParent();
+		ParsingObject child  = node;
+		String parenttag     = parent.getTag().toString();
+		String childtag      = child.getTag().toString();
+		if(parent == null) return;
+		if(this.schemadata.containsKey(parenttag)) {
+			Schema data = this.schemadata.get(parenttag);
+			ArrayList<String> fieldlist = data.getfieldlist();
+			if(!fieldlist.contains(childtag)) {
+				fieldlist.add(childtag);
 			}
-		} catch (Exception e){
-			System.out.println("Exception：" + e);
+		}
+	}
+	
+	private void buildDataBaseSchema(ParsingObject root, int id) {
+		if(root == null) return;
+		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
+		queue.offer(root);
+		while(!queue.isEmpty()) {
+			ParsingObject node = queue.poll();
+			node.setId(id++);
+			this.buildPrimeSchema(node);
+			for(int index = 0; index < node.size(); index++) {
+				ParsingObject childnode = node.get(index);
+				this.buildOtherSchema(childnode);
+				queue.offer(childnode);
+			}
 		}
 	}
 
-	private void buildDataBase() {
+	
+	private void createSQlStmt(ParsingObject node) {
+		String tag = node.getTag().toString();
+		if(this.schemadata.containsKey(tag)) {
+			Schema schema = this.schemadata.get(tag);
+		}
+	}
+	
+	private void insertDataBase(ParsingObject root) {
+		if(root == null) return;
+		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
+		queue.offer(root);
+		while(!queue.isEmpty()) {
+			ParsingObject node = queue.poll();
+			this.createSQlStmt(node);
+			for(int index = 0; index < node.size(); index++) {
+				queue.offer(node.get(index));
+			}
+		}
+	}
+	
+	private void generateSchemaSQL() {
 		String msg = "";
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			msg = "Success!!";
-			Connection con   = DriverManager.getConnection( "jdbc:mysql://localhost:3306/peg4dDB", "masaki","masaki");
-			Statement  stmt  = con.createStatement();
-			//String     table = "parsingObjectDB";
-			String     table = "json";
-			String     sql   = "CREATE TABLE " + table + "( "
-					+ "tag VARCHAR(64),"
-					+ "value VARCHAR(256),"
-					+ "lt INT PRIMARY KEY,"
-					+ "rt INT,"
-					+ "depth INT );";
-			stmt.execute(sql);
-
-			executeInsertSQL(table, stmt);
+			Connection con  = DriverManager.getConnection( "jdbc:mysql://localhost:3306/peg4dDB", "masaki","masaki");
+			Statement  stmt = con.createStatement();
+			for(String table : this.schemadata.keySet()) {
+				String sql = "CREATE TABLE " + table + "( ";
+				ArrayList<String> fieldlist = this.schemadata.get(table).getfieldlist();
+				String field = "";
+				for(int i = 0; i < fieldlist.size(); i++) {
+					field += fieldlist.get(i) + " VARCHAR(256)";
+					if(i != fieldlist.size() - 1) {
+						field += ", ";
+					}
+				}
+				sql += field + ");";
+				System.out.println(sql);
+				stmt.execute(sql);
+			}
 			stmt.close();
 		} catch (ClassNotFoundException e){
 			msg = "Fail!!";
@@ -117,12 +104,38 @@ public class DBBuilder {
 		}
 		System.out.println(msg);
 	}
-
+	
 	public void build(ParsingObject root) {
-		this.parseAST(root, 0);
-		this.sortList();
-		//this.showDataList();
-		this.buildDataBase();
-		System.out.println("----------------------------------");
+		this.buildDataBaseSchema(root, 1);
+		this.generateSchemaSQL();
+		
+		//this.insertDataBase(root);
+		ArrayList<String> array = this.schemadata.get("Element").getfieldlist();
+		System.out.println("table: " + this.schemadata.get("Element").getPrimaryField());
+		for(int i = 0; i < array.size(); i++) {
+			System.out.println(array.get(i));
+		}
+		array = this.schemadata.get("Attr").getfieldlist();
+		System.out.println("table: " + this.schemadata.get("Attr").getPrimaryField());
+		for(int i = 0; i < array.size(); i++) {
+			System.out.println(array.get(i));
+		}
+		System.out.println("-----------------------------------------");
+	}
+}
+
+class Schema {
+	private String            primaryfield = null;
+	private ArrayList<String> fieldlist   = null;
+	public Schema(String primaryfield) {
+		this.primaryfield = primaryfield;
+		this.fieldlist   = new ArrayList<String>();
+	}
+	public String getPrimaryField() {
+		return this.primaryfield;
+	}
+	
+	public ArrayList<String> getfieldlist() {
+		return this.fieldlist;
 	}
 }
