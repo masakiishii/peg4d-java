@@ -24,13 +24,13 @@ String
 	= '"' { ('\\"' / '\\\\' / !'"' .)* #String } '"'
 
 Number
-        = { '-'? INT (FRAC EXP? #Float / '' #Integer) }
+        = { '-'? INT (FRAC EXP? #_Float / '' #_Integer) }
 True
         = { 'true'  #True }
 False
         = { 'false' #False }
 Null
-        = { 'null'  #Null }
+        = { 'null'  #_Null }
 
 S
 	= [ \t\n\r]
