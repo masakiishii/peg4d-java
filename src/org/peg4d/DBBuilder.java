@@ -2,6 +2,7 @@ package org.peg4d;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.Queue;
@@ -10,9 +11,13 @@ import java.sql.*;
 public class DBBuilder {
 	
 	private HashMap<String, HashMap<String, NodeData>> datamap = null;
+	private ArrayList<ParsingObject> targetlist  = null;
+	private ArrayList<String>        columnfield = null;
 	
 	public DBBuilder() {
-		datamap = new HashMap<String, HashMap<String, NodeData>>();
+		datamap     = new HashMap<String, HashMap<String, NodeData>>();
+		targetlist  = new ArrayList<ParsingObject>();
+		columnfield = new ArrayList<String>();
 	}
 	
 	private void buildDataMap(ParsingObject node) {
@@ -38,13 +43,12 @@ public class DBBuilder {
 		}
 	}
 	
-	private void analyzeFrequency(ParsingObject root, int id) {
+	private void analyzeFrequency(ParsingObject root) {
 		if(root == null) return;
 		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
 		queue.offer(root);
 		while(!queue.isEmpty()) {
 			ParsingObject node = queue.poll();
-			node.setId(id++);
 			if(node.size() == 0) this.buildDataMap(node);
 			for(int index = 0; index < node.size(); index++) {
 				queue.offer(node.get(index));
@@ -61,24 +65,49 @@ public class DBBuilder {
 		return idlist.toString();
 	}
 	
-	private void showDataMap() {
-		int counter = 0;
+	private int culcFrequencyAverage() {
+		int counter = 0, sum = 0;
 		for(String tag : this.datamap.keySet()) {
 			HashMap<String, NodeData> nodedatamap = this.datamap.get(tag);
 			for(String value : nodedatamap.keySet()) {
 				NodeData nodedata = nodedatamap.get(value);
-				if(nodedata.getFrequency() > 2) {
-					counter++;
-					System.out.println("tag: " + nodedata.getTag());
-					System.out.println("value: " + nodedata.getValue());
-					System.out.println("freq: " + nodedata.getFrequency());
-					System.out.println("nodelist: " + this.showNodeIDList(nodedata.getNodeList()));
+				counter++;
+				sum += nodedata.getFrequency();
+			}
+		}
+		return sum / counter;
+	}
+	private boolean isNumber(String str) {
+		try {
+			Double.parseDouble(str);
+			return true;
+		} catch(NumberFormatException e) {
+			return false;
+		}
+	}
+	private boolean isKeyword(String str) {
+		switch(str) {
+		case "null":
+			return true;
+		}
+		return false;
+	}
+	
+	private void nominateColumnField() {
+		int average = this.culcFrequencyAverage();
+		for(String tag : this.datamap.keySet()) {
+			HashMap<String, NodeData> nodedatamap = this.datamap.get(tag);
+			for(String value : nodedatamap.keySet()) {
+				NodeData nodedata = nodedatamap.get(value);
+				if(nodedata.getFrequency() > average) {
+					String nodevalue = nodedata.getValue();
+					if(!this.isNumber(nodevalue) && !this.isKeyword(nodevalue)) {
+						ArrayList<String> data = new ArrayList<String>();
+						this.columnfield.add(nodevalue);
+					}
 				}
 			}
 		}
-		System.out.println("================");
-		System.out.println("column size: " + counter);
-		System.out.println("================");
 	}
 	
 	private void analyzeAverageDepthLevel(ParsingObject node, int depthlevel, int a[]) {
@@ -89,26 +118,112 @@ public class DBBuilder {
 		}
 	}
 	
-	public int getTargetDepth(ParsingObject root) {
+	private int getTargetDepth(ParsingObject root) {
 		int a[] = new int[16];
 		this.analyzeAverageDepthLevel(root, 1, a);
-		int max = 0;
+		int max      = 0;
 		int maxindex = 0;
+		int sum      = 0;
 		for(int i = 0; i < a.length; i++) {
-			System.out.println("a[" + i + "]: " + a[i]);
+			sum += a[i];
 			if(max < a[i]) {
 				max = a[i];
 				maxindex = i;
 			}
 		}
-		System.out.println("MaxIndex: " + maxindex + ", Max: " + a[maxindex]);
 		return maxindex;
 	}
 	
+	private void getTargetDepthNode(ParsingObject node, int depth, int target) {
+		if(node == null) return;
+		if(depth == target) this.targetlist.add(node);
+		for(int i = 0; i < node.size(); i++) {
+			this.getTargetDepthNode(node.get(i), depth + 1, target);
+		}
+	}
+	private void numberingNodeID(ParsingObject root, int id) {
+		if(root == null) return;
+		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
+		queue.offer(root);
+		while(!queue.isEmpty()) {
+			ParsingObject node = queue.poll();
+			node.setId(id++);
+			for(int index = 0; index < node.size(); index++) {
+				queue.offer(node.get(index));
+			}
+		}
+	}
+
+	private void generateSchemaSQL() {
+		String msg = "";
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			msg = "Success!!";
+			Connection con  = DriverManager.getConnection( "jdbc:mysql://localhost:3306/peg4dDB", "masaki","masaki");
+			Statement  stmt = con.createStatement();
+			String tablename = "Json_Table";
+			String sql   = "CREATE TABLE " + tablename + "(";
+			String field = "";
+			for(int i = 0; i < this.columnfield.size(); i++) {
+				field += this.columnfield.get(i) + " VARCHAR(128)";
+				if(i != this.columnfield.size() - 1) {
+					field += ", ";
+				}
+			}
+			sql += field + ");";
+			System.out.println(sql);
+			stmt.execute(sql);
+			stmt.close();
+		} catch (ClassNotFoundException e){
+			msg = "Fail!!";
+		} catch (Exception e){
+			System.out.println("Exception：" + e);
+		}
+		System.out.println(msg);
+	}
+	private void generateInsertSQL(ParsingObject node, HashMap<String, ArrayList<String>> map) {
+		if(node == null) return;
+		if(node.size() == 0 && this.columnfield.contains(node.getText())) {
+			ParsingObject parent   = node.getParent();
+			ArrayList<String> data = map.get(node.getText());
+			for(int i = 0; i < parent.size(); i++) {
+				ParsingObject cur = parent.get(i);
+				if(cur.equals(node)) continue;
+				if(cur.size() == 0) data.add(cur.getText());
+			}
+		}
+		for(int i = 0; i < node.size(); i++) {
+			generateInsertSQL(node.get(i), map);
+		}
+	}
+
+	private LinkedHashMap<String, ArrayList<String>> initFieldData() {
+		LinkedHashMap<String, ArrayList<String>> map = new LinkedHashMap<String, ArrayList<String>>();
+		for(int i = 0; i < this.columnfield.size(); i++) {
+			String field = this.columnfield.get(i);
+			ArrayList<String> data = new ArrayList<String>();
+			map.put(field, data);
+		}
+		return map;
+	}
+	
 	public void build(ParsingObject root) {
+		this.numberingNodeID(root, 1);
 		int targetdepth = this.getTargetDepth(root);
-		this.analyzeFrequency(root, 1);
-		//this.showDataMap();
+		this.getTargetDepthNode(root, 1, targetdepth - 3);
+		for(int i = 0; i < this.targetlist.size(); i++) {
+			this.analyzeFrequency(this.targetlist.get(i));
+		}
+		this.nominateColumnField();
+		this.generateSchemaSQL();
+		for(int i = 0; i < this.targetlist.size(); i++) {
+			LinkedHashMap<String, ArrayList<String>> fielddatamap = this.initFieldData();;
+			this.generateInsertSQL(this.targetlist.get(i), fielddatamap);
+			for(String key : fielddatamap.keySet()) {
+				System.out.println(key + " : " + fielddatamap.get(key).toString());
+			}
+			System.out.println("-----------------------------------------");
+		}
 		System.out.println("-----------------------------------------");
 	}
 }
