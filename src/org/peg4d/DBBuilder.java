@@ -67,15 +67,23 @@ public class DBBuilder {
 	
 	private int culcFrequencyAverage() {
 		int counter = 0, sum = 0;
+		int a[] = new int[100000000];
 		for(String tag : this.datamap.keySet()) {
 			HashMap<String, NodeData> nodedatamap = this.datamap.get(tag);
 			for(String value : nodedatamap.keySet()) {
 				NodeData nodedata = nodedatamap.get(value);
+				a[counter] = nodedata.getFrequency();
 				counter++;
 				sum += nodedata.getFrequency();
 			}
 		}
+//		for(int i = 0; i < a.length; i++) {
+//			if(a[i] != 0) {
+//				System.out.println("a[" + "]: " + a[i]);
+//			}
+//		}
 		return sum / counter;
+//		return 100;
 	}
 	private boolean isNumber(String str) {
 		try {
@@ -87,7 +95,7 @@ public class DBBuilder {
 	}
 	private boolean isKeyword(String str) {
 		switch(str) {
-		case "null":
+		case "null": case "from": case "to":
 			return true;
 		}
 		return false;
@@ -162,6 +170,7 @@ public class DBBuilder {
 			Connection con  = DriverManager.getConnection( "jdbc:mysql://localhost:3306/peg4dDB", "masaki","masaki");
 			Statement  stmt = con.createStatement();
 			String tablename = "Json_Table";
+//			String tablename = "XML_Table";
 			String sql   = "CREATE TABLE " + tablename + "(";
 			String field = "";
 			for(int i = 0; i < this.columnfield.size(); i++) {
@@ -172,6 +181,7 @@ public class DBBuilder {
 			}
 			sql += field + ");";
 			System.out.println(sql);
+			sql.replace("$", "\\$");
 			stmt.execute(sql);
 			stmt.close();
 		} catch (ClassNotFoundException e){
@@ -207,6 +217,53 @@ public class DBBuilder {
 		return map;
 	}
 	
+	private String concatList(ArrayList<String> value) {
+		String ret = "";
+		for(int i = 0; i < value.size(); i++) {
+			ret += value.get(i);
+			if(i != value.size() - 1) ret += ",";
+		}
+		return ret;
+	}
+	
+	private void executeInsertSQLStmt(String sql) {
+		String msg = "";
+		try {
+			msg = "Success!!";
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection con  = DriverManager.getConnection( "jdbc:mysql://localhost:3306/peg4dDB", "masaki","masaki");
+			Statement  stmt = con.createStatement();
+			stmt.execute(sql);
+			stmt.close();
+		} catch (ClassNotFoundException e){
+			msg = "Fail!!";
+		} catch (Exception e){
+			System.out.println("Exception：" + e);
+		}
+		System.out.println(msg);
+	}
+	
+	private void createSQLStmt(LinkedHashMap<String, ArrayList<String>> fielddatamap) {
+		String tablename = "Json_Table";
+//		String tablename = "XML_Table";
+		String pre = "INSERT INTO " + tablename + " VALUES (";
+		String sql = pre;
+		int i = 0;
+		for(String key : fielddatamap.keySet()) {
+			ArrayList<String> valuelist = fielddatamap.get(key);
+			if(valuelist.size() == 1) {
+				sql += "'" + valuelist.get(0) + "'";
+			}
+			else {
+				String value = (valuelist.toString().length() > 128) ? "too long" : this.concatList(valuelist);
+				sql += "'" + value + "'";
+			}
+			sql += (i != fielddatamap.size() - 1) ? ", " : ");";
+			i++;
+		}
+		this.executeInsertSQLStmt(sql);
+	}
+
 	public void build(ParsingObject root) {
 		this.numberingNodeID(root, 1);
 		int targetdepth = this.getTargetDepth(root);
@@ -219,10 +276,7 @@ public class DBBuilder {
 		for(int i = 0; i < this.targetlist.size(); i++) {
 			LinkedHashMap<String, ArrayList<String>> fielddatamap = this.initFieldData();;
 			this.generateInsertSQL(this.targetlist.get(i), fielddatamap);
-			for(String key : fielddatamap.keySet()) {
-				System.out.println(key + " : " + fielddatamap.get(key).toString());
-			}
-			System.out.println("-----------------------------------------");
+			this.createSQLStmt(fielddatamap);
 		}
 		System.out.println("-----------------------------------------");
 	}
