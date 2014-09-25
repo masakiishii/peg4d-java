@@ -107,11 +107,13 @@ public class DBBuilder {
 			HashMap<String, NodeData> nodedatamap = this.datamap.get(tag);
 			for(String value : nodedatamap.keySet()) {
 				NodeData nodedata = nodedatamap.get(value);
+				//System.out.println("value: " + value + ", Frequency: " + nodedata.getFrequency());
 				if(nodedata.getFrequency() > average) {
 					String nodevalue = nodedata.getValue();
 					if(!this.isNumber(nodevalue) && !this.isKeyword(nodevalue)) {
 						ArrayList<String> data = new ArrayList<String>();
 						this.columnfield.add(nodevalue);
+						System.out.println("value: " + nodevalue + ", Frequency: " + nodedata.getFrequency());
 					}
 				}
 			}
@@ -198,7 +200,8 @@ public class DBBuilder {
 			ArrayList<String> data = map.get(node.getText());
 			for(int i = 0; i < parent.size(); i++) {
 				ParsingObject cur = parent.get(i);
-				if(cur.equals(node)) continue;
+				if(cur.equals(node) || data.contains(cur.getText()) 
+						|| this.columnfield.contains(cur.getText())) continue;
 				if(cur.size() == 0) data.add(cur.getText());
 			}
 		}
@@ -263,7 +266,17 @@ public class DBBuilder {
 		}
 		this.executeInsertSQLStmt(sql);
 	}
-
+	int counter = 0;
+	private void countAllLeafNode(ParsingObject node) {
+		if(node == null) return;
+		if(node.size() == 0) {
+			if(this.columnfield.contains(node.getText())) this.counter++;
+		}
+		for(int i = 0; i < node.size(); i++) {
+			this.countAllLeafNode(node.get(i));
+		}
+	}
+	
 	public void build(ParsingObject root) {
 		this.numberingNodeID(root, 1);
 		int targetdepth = this.getTargetDepth(root);
@@ -272,14 +285,25 @@ public class DBBuilder {
 			this.analyzeFrequency(this.targetlist.get(i));
 		}
 		this.nominateColumnField();
+		System.out.println(this.columnfield.size());
+		this.countAllLeafNode(root);
+		System.out.println(counter);
 		this.generateSchemaSQL();
+		int counter = 0;
 		for(int i = 0; i < this.targetlist.size(); i++) {
 			LinkedHashMap<String, ArrayList<String>> fielddatamap = this.initFieldData();;
 			this.generateInsertSQL(this.targetlist.get(i), fielddatamap);
+			
+			for(String key : fielddatamap.keySet()) {
+				ArrayList<String> datalist = fielddatamap.get(key);
+				counter += datalist.size();
+			}
 			this.createSQLStmt(fielddatamap);
 		}
+		System.out.println("Node number: " + counter);
 		System.out.println("-----------------------------------------");
 	}
+
 }
 
 class NodeData {
