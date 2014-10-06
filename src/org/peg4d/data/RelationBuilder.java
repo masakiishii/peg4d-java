@@ -12,13 +12,16 @@ import java.util.Set;
 public class RelationBuilder {
 	private ParsingObject root   = null;
 	private int           rootid = -1;
-	private ArrayList<SubNodeDataSet> allsubnodeset = null;
+	private ArrayList<SubNodeDataSet> allsubnodesetlist = null;
 	public RelationBuilder(ParsingObject root) {
 		this.root   = root;
 		this.rootid = root.getObjectId();
-		this.allsubnodeset = new ArrayList<SubNodeDataSet>();
+		this.allsubnodesetlist = new ArrayList<SubNodeDataSet>();
 	}
 	
+	public ArrayList<SubNodeDataSet> getSubNodeDataSetList() {
+		return this.allsubnodesetlist;
+	}
 	public int getObjectId(ParsingObject node) {
 		return node.getObjectId() - this.rootid;
 	}
@@ -39,12 +42,14 @@ public class RelationBuilder {
 		while(!queue.isEmpty()) {
 			ParsingObject node = queue.poll();
 			if(node.size() != 0 && node.get(0).size() == 0) {
-				String value = node.get(0).getText();
+				ParsingObject assumedtablenode = node.get(0);
+				String value = assumedtablenode.getText();
 				if(!this.isNumber(value)) {
 					System.out.println("id: " + this.getObjectId(node.get(0)) + ", " + value);
-					SubNodeDataSet subnodeset = new SubNodeDataSet(this, node, value);
+					SubNodeDataSet subnodeset
+						= new SubNodeDataSet(this, node, value, this.getObjectId(assumedtablenode));
 					subnodeset.buildAssumedColumnSet();
-					this.allsubnodeset.add(subnodeset);
+					this.allsubnodesetlist.add(subnodeset);
 				}
 			}
 			for(int index = 0; index < node.size(); index++) {
@@ -52,12 +57,10 @@ public class RelationBuilder {
 			}
 		}
 	}
-
-	public void build() {
-		System.out.println("root id: " + this.getObjectId(root));
-		this.breadthFirstSearch(root);
-		for(int i = 0; i < this.allsubnodeset.size(); i++) {
-			SubNodeDataSet subnodedata = this.allsubnodeset.get(i);
+	
+	private void showSubNodeSet() {
+		for(int i = 0; i < this.allsubnodesetlist.size(); i++) {
+			SubNodeDataSet subnodedata = this.allsubnodesetlist.get(i);
 			Set<String> subnodeset     = subnodedata.getAssumedColumnSet();
 			System.out.println("tableName: " + subnodedata.getAssumedTableName());
 			System.out.println("-----------------------------------------------");
@@ -66,6 +69,13 @@ public class RelationBuilder {
 			}
 			System.out.println("\n");
 		}
+	}
+
+	public void build() {
+		this.breadthFirstSearch(root);
+		//this.showSubNodeSet();
+		CalcJaccardCoefficient jaccard = new CalcJaccardCoefficient(this);
+		jaccard.calculating();
 		System.out.println("----------------------------------------");
 	}
 }

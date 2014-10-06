@@ -12,12 +12,14 @@ public class SubNodeDataSet {
 	private ParsingObject   subNode           = null;
 	private String          assumedTableName  = null;
 	private Set<String>     assumedColumnSet  = null;
+	private int             assumedTableId    = -1;
 	public SubNodeDataSet(RelationBuilder relationbuilder, 
-				ParsingObject subNode, String assumedTableName) {
+				ParsingObject subNode, String assumedTableName, int assumedTableId) {
 		this.relationbuilder  = relationbuilder;
 		this.subNode          = subNode;
 		this.assumedTableName = assumedTableName;
 		this.assumedColumnSet = new HashSet<String>();
+		this.assumedTableId   = assumedTableId;
 	}
 	
 	public void buildAssumedColumnSet() {
@@ -26,7 +28,8 @@ public class SubNodeDataSet {
 		queue.offer(this.subNode);
 		while(!queue.isEmpty()) {
 			ParsingObject node = queue.poll();
-			if(node.size() != 0 && node.get(0).size() == 0) {
+			if(node.size() != 0 && node.get(0).size() == 0
+					&& this.relationbuilder.getObjectId(node.get(0)) != this.assumedTableId) {
 				String value = node.get(0).getText();
 				if(!this.relationbuilder.isNumber(value)) {
 					this.assumedColumnSet.add(value);
@@ -36,7 +39,6 @@ public class SubNodeDataSet {
 				queue.offer(node.get(index));
 			}
 		}
-		return;
 	}
 	
 	public String getAssumedTableName() {
