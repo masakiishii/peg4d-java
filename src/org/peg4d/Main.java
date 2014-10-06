@@ -355,8 +355,8 @@ public class Main {
 		}
 		ParsingObject pego = context.parse(peg, startPoint, new ParsingMemoConfigure());
 		if(Relation) {
-			RelationBuilder RBuilder = new RelationBuilder();
-			RBuilder.build(pego);
+			RelationBuilder RBuilder = new RelationBuilder(pego);
+			RBuilder.build();
 		}
 		
 		if(context.isFailure()) {

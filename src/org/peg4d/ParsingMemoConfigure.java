@@ -129,7 +129,7 @@ public class ParsingMemoConfigure {
 			}
 		}
 		for(MemoMatcher m : memoList) {
-			System.out.println(m);
+			//System.out.println(m);
 		}
 	}
 
