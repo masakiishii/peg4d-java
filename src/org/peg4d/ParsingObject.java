@@ -34,6 +34,10 @@ public class ParsingObject extends AbstractList<ParsingObject> {
 //	protected void finalize() {
 //		System.out.println("gc " + this.getSourcePosition());
 //	}
+	
+	public int getObjectId() {
+		return this.oid;
+	}
 
 	public final ParsingObject getParent() {
 		return this.parent;
