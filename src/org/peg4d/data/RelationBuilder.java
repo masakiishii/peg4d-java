@@ -45,7 +45,7 @@ public class RelationBuilder {
 				ParsingObject assumedtablenode = node.get(0);
 				String value = assumedtablenode.getText();
 				if(!this.isNumber(value)) {
-					System.out.println("id: " + this.getObjectId(node.get(0)) + ", " + value);
+					//System.out.println("id: " + this.getObjectId(node.get(0)) + ", " + value);
 					SubNodeDataSet subnodeset
 						= new SubNodeDataSet(this, node, value, this.getObjectId(assumedtablenode));
 					subnodeset.buildAssumedColumnSet();
@@ -76,6 +76,9 @@ public class RelationBuilder {
 		//this.showSubNodeSet();
 		CalcJaccardCoefficient jaccard = new CalcJaccardCoefficient(this);
 		jaccard.calculating();
+		SchemaMatcher schemamatcher = new SchemaMatcher(jaccard.getSchema());
+		schemamatcher.matcher(root);
+		
 		System.out.println("----------------------------------------");
 	}
 }
