@@ -50,6 +50,9 @@ public class RelationBuilder {
 						= new SubNodeDataSet(this, node, value, this.getObjectId(assumedtablenode));
 					subnodeset.buildAssumedColumnSet();
 					this.allsubnodesetlist.add(subnodeset);
+					if(value.equals("emph")) {
+						System.out.println(subnodeset.getAssumedColumnSet().toString());
+					}
 				}
 			}
 			for(int index = 0; index < node.size(); index++) {
@@ -72,11 +75,15 @@ public class RelationBuilder {
 	}
 
 	public void build() {
+		BuildJeoCelkoSet bjcset = new BuildJeoCelkoSet();
+		bjcset.numberingLRpos(root);
 		this.breadthFirstSearch(root);
 		//this.showSubNodeSet();
-		CalcJaccardCoefficient jaccard = new CalcJaccardCoefficient(this);
-		jaccard.calculating();
-		SchemaMatcher schemamatcher = new SchemaMatcher(jaccard.getSchema());
+		NominateSchema preschema = new NominateSchema(this);
+		preschema.nominating();
+		DefineSchema defineschema = new DefineSchema(preschema);
+		defineschema.define();
+		SchemaMatcher schemamatcher = new SchemaMatcher(preschema.getSchema());
 		schemamatcher.matcher(root);
 		
 		System.out.println("----------------------------------------");

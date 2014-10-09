@@ -10,10 +10,10 @@ import java.util.Set;
 import org.peg4d.*;
 
 public class SchemaMatcher {
-	private Map<String, Set<String>> schema = null;
+	private Map<String, SubNodeDataSet> schema = null;
 	private Map<String, ArrayList<ArrayList<String>>> table = null;
-	public SchemaMatcher(Map<String, Set<String>> schema) {
-		this.schema = new HashMap<String, Set<String>>();
+	public SchemaMatcher(Map<String, SubNodeDataSet> schema) {
+		this.schema = new HashMap<String, SubNodeDataSet>();
 		this.schema = schema;
 		this.initTable();
 	}
@@ -25,19 +25,24 @@ public class SchemaMatcher {
 		}
 	}
 	
-	private String getColumnData(ParsingObject subnode, String column) {
+	private String getColumnData(ParsingObject subnode, ParsingObject tablenode, String column) {
 		if(subnode == null) return null;
 		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
 		queue.offer(subnode);
 		while(!queue.isEmpty()) {
 			ParsingObject node = queue.poll();
 			if(node.getText().toString().equals(column)) {
-				System.out.println("column: " + column);
-				System.out.println("data:   " + node.getParent().get(1).getText().toString());
-				return node.getParent().get(1).getText().toString();
+				if(node.getParent().size() > 1) {
+					System.out.println("column: " + column);
+					System.out.println("data:   " + node.getParent().get(1).getText().toString());
+					return node.getParent().get(1).getText().toString();
+				}
+				else {
+					return null;
+				}
 			}
 			for(int index = 0; index < node.size(); index++) {
-				queue.offer(node.get(index));
+				if(!node.equals(tablenode)) queue.offer(node.get(index));
 			}
 		}
 		System.out.println("column: " + column);
@@ -45,11 +50,14 @@ public class SchemaMatcher {
 		return null;
 	}
 	
-	private void getTupleData(ParsingObject node, String tablename, Set<String> columns) {
+	private void getTupleData(ParsingObject subnode, ParsingObject tablenode, String tablename, SubNodeDataSet columns) {
 		ArrayList<ArrayList<String>> tabledata = this.table.get(tablename);
 		ArrayList<String> columndata = new ArrayList<String>();
-		for(String column : columns) {
-			String data = this.getColumnData(node, column);
+		if(tablename.equals("item")) {
+			System.out.println("break");
+		}
+		for(String column : columns.getAssumedColumnSet()) {
+			String data = this.getColumnData(subnode, tablenode, column);
 			columndata.add(data);
 			System.out.println("---------------------------------------");
 		}
@@ -64,7 +72,9 @@ public class SchemaMatcher {
 		if(node == null) return;
 		if(node.size() == 0 && this.isTableName(node.getText().toString())) {
 			String tablename = node.getText().toString();
-			this.getTupleData(node.getParent().get(1), tablename, this.schema.get(tablename));
+			if(node.getParent().size() > 1) {
+				this.getTupleData(node.getParent(), node, tablename, this.schema.get(tablename));
+			}
 		}
 		for(int i = 0; i < node.size(); i++) {
 			this.matching(node.get(i));
@@ -75,8 +85,11 @@ public class SchemaMatcher {
 		for(String tablename : this.schema.keySet()) {
 			StringBuilder buf = new StringBuilder();
 			buf.append("tablename: " + tablename + "\n");
+			if(tablename.equals("item")) {
+				System.out.println("break");
+			}
 			buf.append("-------------------------------------------\n");
-			Set<String> set = this.schema.get(tablename);
+			Set<String> set = this.schema.get(tablename).getAssumedColumnSet();
 			for(String column : set) {
 				buf.append(column + ",");
 			}

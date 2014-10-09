@@ -8,18 +8,19 @@ import java.util.Queue;
 import java.util.Set;
 
 public class SubNodeDataSet {
-	private RelationBuilder relationbuilder   = null;
-	private ParsingObject   subNode           = null;
-	private String          assumedTableName  = null;
-	private Set<String>     assumedColumnSet  = null;
-	private int             assumedTableId    = -1;
+	private RelationBuilder relationbuilder    = null;
+	private ParsingObject   subNode            = null;
+	private String          assumedTableName   = null;
+	private Set<String>     assumedColumnSet   = null;
+	private int             assumedTableNodeId = -1;
+	private double          jaccardCoefficient = -1;
 	public SubNodeDataSet(RelationBuilder relationbuilder, 
 				ParsingObject subNode, String assumedTableName, int assumedTableId) {
 		this.relationbuilder  = relationbuilder;
 		this.subNode          = subNode;
 		this.assumedTableName = assumedTableName;
 		this.assumedColumnSet = new HashSet<String>();
-		this.assumedTableId   = assumedTableId;
+		this.assumedTableNodeId   = assumedTableId;
 	}
 	
 	public void buildAssumedColumnSet() {
@@ -29,7 +30,7 @@ public class SubNodeDataSet {
 		while(!queue.isEmpty()) {
 			ParsingObject node = queue.poll();
 			if(node.size() != 0 && node.get(0).size() == 0
-					&& this.relationbuilder.getObjectId(node.get(0)) != this.assumedTableId) {
+					&& this.relationbuilder.getObjectId(node.get(0)) != this.assumedTableNodeId) {
 				String value = node.get(0).getText();
 				if(!this.relationbuilder.isNumber(value)) {
 					this.assumedColumnSet.add(value);
@@ -41,10 +42,20 @@ public class SubNodeDataSet {
 		}
 	}
 	
+	public ParsingObject getSubNode() {
+		return this.subNode;
+	}
+	
 	public String getAssumedTableName() {
 		return this.assumedTableName;
 	}
 	public Set<String> getAssumedColumnSet() {
 		return this.assumedColumnSet;
+	}
+	public void setJaccardCoefficient(double jaccardcoefficient) {
+		this.jaccardCoefficient = jaccardcoefficient;
+	}
+	public double getJaccardCoefficient() {
+		return this.jaccardCoefficient;
 	}
 }

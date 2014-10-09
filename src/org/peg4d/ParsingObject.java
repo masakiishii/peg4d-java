@@ -12,6 +12,9 @@ public class ParsingObject extends AbstractList<ParsingObject> {
 	private Object           value  = null;
 	ParsingObject            parent = null;
 	private ParsingObject    AST[] = null;
+	private int              lpos  = -1;
+	private int              rpos  = -1;
+	
 
 	public ParsingObject(ParsingTag tag, ParsingSource source, long pospeg) {
 		this.oid = idCount++;
@@ -38,7 +41,23 @@ public class ParsingObject extends AbstractList<ParsingObject> {
 	public int getObjectId() {
 		return this.oid;
 	}
+	
+	public void setLpos(int lpos) {
+		this.lpos = lpos;
+	}
 
+	public void setRpos(int rpos) {
+		this.rpos = rpos;
+	}
+	
+	public int getLpos() {
+		return this.lpos;
+	}
+
+	public int getRpos() {
+		return this.rpos;
+	}
+	
 	public final ParsingObject getParent() {
 		return this.parent;
 	}
