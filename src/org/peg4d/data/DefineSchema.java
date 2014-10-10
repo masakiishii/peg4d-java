@@ -3,6 +3,7 @@ package org.peg4d.data;
 import org.peg4d.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -34,7 +35,17 @@ public class DefineSchema {
 		return list;
 	}
 	
-	private void defineSchema() {
+	private Map<String, SubNodeDataSet> buildMap(ArrayList<SubNodeDataSet> list) {
+		Map<String, SubNodeDataSet> map = new HashMap<String, SubNodeDataSet>();
+		for(int i = 0; i < list.size(); i++) {
+			SubNodeDataSet set = list.get(i);
+			String tablename   = set.getAssumedTableName();
+			map.put(tablename, set);
+		}
+		return map;
+	}
+	
+	private Map<String, SubNodeDataSet> defineSchema() {
 		ArrayList<SubNodeDataSet> sortedschemalist = this.sortNominatedSchemaTable();
 		for(int i = 0; i < sortedschemalist.size(); i++) {
 			SubNodeDataSet subnodedatasetX = sortedschemalist.get(i);
@@ -50,9 +61,10 @@ public class DefineSchema {
 				}
 			}
 		}
+		return this.buildMap(sortedschemalist);
 	}
 	
-	public void define() {
-		this.defineSchema();
+	public Map<String, SubNodeDataSet> define() {
+		return this.defineSchema();
 	}
 }

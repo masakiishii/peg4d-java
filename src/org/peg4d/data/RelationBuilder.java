@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
@@ -79,9 +80,10 @@ public class RelationBuilder {
 		NominateSchema preschema = new NominateSchema(this);
 		preschema.nominating();
 		DefineSchema defineschema = new DefineSchema(preschema, root);
-		defineschema.define();
-		SchemaMatcher schemamatcher = new SchemaMatcher(preschema.getSchema());
-		schemamatcher.matcher(root);
+		Map<String, SubNodeDataSet> definedschema = defineschema.define();
+		//SchemaMatcher schemamatcher = new SchemaMatcher(preschema.getSchema());
+		SchemaMatcher schemamatcher = new SchemaMatcher(definedschema);
+		schemamatcher.match(root);
 		System.out.println("----------------------------------------");
 	}
 }

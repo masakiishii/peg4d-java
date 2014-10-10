@@ -32,10 +32,26 @@ public class SchemaMatcher {
 		while(!queue.isEmpty()) {
 			ParsingObject node = queue.poll();
 			if(node.getText().toString().equals(column)) {
-				if(node.getParent().size() > 1) {
-					System.out.println("column: " + column);
-					System.out.println("data:   " + node.getParent().get(1).getText().toString());
-					return node.getParent().get(1).getText().toString();
+				ParsingObject parent = node.getParent();
+				if(parent.size() == 2) {
+					if(parent.get(1).size() == 0) {
+						System.out.println("column: " + column);
+						System.out.println("data:   " + node.getParent().get(1).getText().toString());
+						return node.getParent().get(1).getText().toString();
+					}
+					else {
+						StringBuffer sbuf = new StringBuffer();
+						for(int i = 1; i < parent.size(); i++) {
+							ParsingObject sibling = parent.get(i);
+							sbuf.append(sibling.get(0).getText().toString());
+							sbuf.append(":");
+							sbuf.append(parent.getObjectId());
+							if(i != parent.size() - 1) sbuf.append(",");
+						}
+						System.out.println("column: " + column);
+						System.out.println("data:   " + sbuf.toString());
+						return sbuf.toString();
+					}
 				}
 				else {
 					return null;
@@ -53,9 +69,6 @@ public class SchemaMatcher {
 	private void getTupleData(ParsingObject subnode, ParsingObject tablenode, String tablename, SubNodeDataSet columns) {
 		ArrayList<ArrayList<String>> tabledata = this.table.get(tablename);
 		ArrayList<String> columndata = new ArrayList<String>();
-		if(tablename.equals("item")) {
-			System.out.println("break");
-		}
 		for(String column : columns.getAssumedColumnSet()) {
 			String data = this.getColumnData(subnode, tablenode, column);
 			columndata.add(data);
@@ -68,16 +81,20 @@ public class SchemaMatcher {
 		return this.schema.containsKey(value) ? true : false;
 	}
 	
-	private void matching(ParsingObject node) {
-		if(node == null) return;
-		if(node.size() == 0 && this.isTableName(node.getText().toString())) {
-			String tablename = node.getText().toString();
-			if(node.getParent().size() > 1) {
+	private void matching(ParsingObject root) {
+		if(root == null) return;
+		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
+		queue.offer(root);
+		while(!queue.isEmpty()) {
+			ParsingObject node = queue.poll();
+			if(node.size() == 0 && this.isTableName(node.getText().toString())) {
+				String tablename = node.getText().toString();
 				this.getTupleData(node.getParent(), node, tablename, this.schema.get(tablename));
+				return;
 			}
-		}
-		for(int i = 0; i < node.size(); i++) {
-			this.matching(node.get(i));
+			for(int index = 0; index < node.size(); index++) {
+				queue.offer(node.get(index));
+			}
 		}
 	}
 	
@@ -106,7 +123,7 @@ public class SchemaMatcher {
 		}
 	}
 	
-	public void matcher(ParsingObject root) {
+	public void match(ParsingObject root) {
 		this.matching(root);
 		this.showTable();
 	}

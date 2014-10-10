@@ -4,6 +4,7 @@ import org.peg4d.*;
 
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
@@ -23,7 +24,7 @@ public class SubNodeDataSet  implements Comparator {
 		this.subNode          = subNode;
 		this.subNodePoint     = new Point(subNode.getLpos(), subNode.getRpos());
 		this.assumedTableName = assumedTableName;
-		this.assumedColumnSet = new HashSet<String>();
+		this.assumedColumnSet = new LinkedHashSet<String>();
 		this.assumedTableNodeId   = assumedTableId;
 	}
 	public SubNodeDataSet() {

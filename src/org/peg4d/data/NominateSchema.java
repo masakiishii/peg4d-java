@@ -5,6 +5,7 @@ import org.peg4d.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,13 +18,13 @@ public class NominateSchema {
 	}
 	
 	private Set<String> calcIntersection(Set<String> setX, Set<String> setY) {
-		Set<String> intersection = new HashSet<String>(setX);
+		Set<String> intersection = new LinkedHashSet<String>(setX);
 		intersection.retainAll(setY);
 		return intersection;
 	}
 	
 	private Set<String> calcUnion(Set<String> setX, Set<String> setY) {
-		Set<String> union = new HashSet<String>(setX);
+		Set<String> union = new LinkedHashSet<String>(setX);
 		union.addAll(setY);
 		return union;
 	}
