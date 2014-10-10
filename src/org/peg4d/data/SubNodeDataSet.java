@@ -2,27 +2,40 @@ package org.peg4d.data;
 
 import org.peg4d.*;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
-public class SubNodeDataSet {
+public class SubNodeDataSet  implements Comparator {
 	private RelationBuilder relationbuilder    = null;
 	private ParsingObject   subNode            = null;
+	private Point           subNodePoint       = null;
 	private String          assumedTableName   = null;
 	private Set<String>     assumedColumnSet   = null;
 	private int             assumedTableNodeId = -1;
 	private double          jaccardCoefficient = -1;
+
 	public SubNodeDataSet(RelationBuilder relationbuilder, 
 				ParsingObject subNode, String assumedTableName, int assumedTableId) {
 		this.relationbuilder  = relationbuilder;
 		this.subNode          = subNode;
+		this.subNodePoint     = new Point(subNode.getLpos(), subNode.getRpos());
 		this.assumedTableName = assumedTableName;
 		this.assumedColumnSet = new HashSet<String>();
 		this.assumedTableNodeId   = assumedTableId;
 	}
-	
+	public SubNodeDataSet() {
+		
+	}
+	@Override
+	public int compare(Object o1, Object o2) {
+		Point p1 = ((SubNodeDataSet)o1).getPoint();
+		Point p2 = ((SubNodeDataSet)o2).getPoint();
+		return p2.getRange() - p1.getRange();
+	}
+
 	public void buildAssumedColumnSet() {
 		if(this.subNode == null) return;
 		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
@@ -42,10 +55,12 @@ public class SubNodeDataSet {
 		}
 	}
 	
+	public Point getPoint() {
+		return this.subNodePoint;
+	}
 	public ParsingObject getSubNode() {
 		return this.subNode;
 	}
-	
 	public String getAssumedTableName() {
 		return this.assumedTableName;
 	}

@@ -9,80 +9,50 @@ import java.util.Queue;
 import java.util.Set;
 
 public class DefineSchema {
-	private NominateSchema nominatedschema   = null;
-	private ArrayList<SubNodeDataSet> buffer = null;
+	private NominateSchema nominatedschema      = null;
+	private SchemaTypeChecker schematypechecker = null;
+	private ParsingObject root                  = null;
 	
-	public DefineSchema(NominateSchema nominatedschema) {
-		this.nominatedschema = nominatedschema;
-		this.buffer = new ArrayList<SubNodeDataSet>();
+	public DefineSchema(NominateSchema nominatedschema, ParsingObject root) {
+		this.nominatedschema   = nominatedschema;
+		this.schematypechecker = new SchemaTypeChecker();
+		this.root              = root;
 	}
 
-	private boolean containsColumn(ParsingObject subnode, String column) {
-		if(subnode == null) return false;
-		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
-		queue.offer(subnode);
-		while(!queue.isEmpty()) {
-			ParsingObject node = queue.poll();
-			if(node.size() == 0 && node.getText().toString().equals(column)) return true;
-			for(int index = 0; index < node.size(); index++) {
-				queue.offer(node.get(index));
-			}
-		}
-		return false;
+	private boolean isSubTree(SubNodeDataSet subnodedatasetX, SubNodeDataSet subnodedatasetY) {
+ 		return this.schematypechecker.check(root, subnodedatasetX, subnodedatasetY);
 	}
 	
-	private void showNominatedSchemaTable() {
+	private ArrayList<SubNodeDataSet> sortNominatedSchemaTable() {
 		Map<String, SubNodeDataSet> schema = this.nominatedschema.getSchema();
+		ArrayList<SubNodeDataSet> list = new ArrayList<SubNodeDataSet>();
 		for(String tablename : schema.keySet()) {
 			SubNodeDataSet subnodedataset = schema.get(tablename);
-			this.buffer.add(subnodedataset);
-			ParsingObject subnode = subnodedataset.getSubNode();
-			System.out.println(tablename + ": " + (subnode.getRpos() - subnode.getLpos()));
-			//System.out.println(tablename + ": " + (subnode.getRpos() - subnode.getLpos()));
-			//System.out.println("lpos: " + subnode.getLpos() + ", rpos: " + subnode.getRpos());
-			System.out.println("---------------------------------------");
-			System.out.println();
+			list.add(subnodedataset);
 		}
-		
-	}
-	
-	private boolean isSubTree(SubNodeDataSet subnodedatasetX, SubNodeDataSet subnodedatasetY) {
- 		Set<String> setX = subnodedatasetX.getAssumedColumnSet();
- 		Set<String> setY = subnodedatasetY.getAssumedColumnSet();
- 		System.out.println("nodex tablename: " + subnodedatasetX.getAssumedTableName());
- 		System.out.println("---------------------------------------------------------");
- 		System.out.println("setx: " + setX);
- 		System.out.println();
- 		System.out.println("nodey tablename: " + subnodedatasetY.getAssumedTableName());
- 		System.out.println("---------------------------------------------------------");
- 		System.out.println("sety: " + setY);
- 		System.out.println();
- 		
- 		return setX.contains(setY) ? true: false;
+		list.sort(new SubNodeDataSet());
+		return list;
 	}
 	
 	private void defineSchema() {
-		ArrayList<SubNodeDataSet> removelist = new ArrayList<SubNodeDataSet>();
-		for(int i = 0; i < this.buffer.size(); i++) {
-			SubNodeDataSet subnodedatasetX = this.buffer.get(i);
-			ParsingObject subnodeX = this.buffer.get(i).getSubNode();
-			for(int j = 0; j < this.buffer.size(); j++) {
-				if(i == j) continue;
-				SubNodeDataSet subnodedatasetY = this.buffer.get(j);
+		ArrayList<SubNodeDataSet> sortedschemalist = this.sortNominatedSchemaTable();
+		for(int i = 0; i < sortedschemalist.size(); i++) {
+			SubNodeDataSet subnodedatasetX = sortedschemalist.get(i);
+			ParsingObject  subnodeX = sortedschemalist.get(i).getSubNode();
+			for(int j = 0; j < sortedschemalist.size(); j++) {
+				SubNodeDataSet subnodedatasetY = sortedschemalist.get(j);
 				ParsingObject subnodeY = subnodedatasetY.getSubNode();
 				String column = subnodedatasetY.getAssumedTableName();
-				if(this.containsColumn(subnodeX, column) && this.isSubTree(subnodedatasetX, subnodedatasetY)) {
-					removelist.add(subnodedatasetY);
+				if(this.isSubTree(subnodedatasetX, subnodedatasetY)) {
+					sortedschemalist.remove(subnodedatasetY);
+					i = 0;
+					j = 0;
 				}
 			}
-		}
-		for(int i = 0; i < removelist.size(); i++) {
-			System.out.println(removelist.get(i).getAssumedTableName());
 		}
 	}
 	
 	public void define() {
-		this.showNominatedSchemaTable();
 		this.defineSchema();
 	}
 }

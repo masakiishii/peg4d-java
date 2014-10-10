@@ -15,6 +15,7 @@ public class NominateSchema {
 		this.relationbuilder = relationbuilder;
 		this.schema = new HashMap<String, SubNodeDataSet>();
 	}
+	
 	private Set<String> calcIntersection(Set<String> setX, Set<String> setY) {
 		Set<String> intersection = new HashSet<String>(setX);
 		intersection.retainAll(setY);
@@ -34,11 +35,15 @@ public class NominateSchema {
 	}
 	
 	private void nominateSchema(String tablename, SubNodeDataSet nodeX, SubNodeDataSet nodeY, double jaccardcoefficient) {
-		if(this.schema.containsKey(tablename)) return;
 		Set<String> setX = nodeX.getAssumedColumnSet();
 		Set<String> setY = nodeY.getAssumedColumnSet();
 		nodeX.setJaccardCoefficient(jaccardcoefficient);
 		nodeY.setJaccardCoefficient(jaccardcoefficient);
+		if(this.schema.containsKey(tablename)) {
+			this.schema.get(tablename).getAssumedColumnSet().addAll(setX);
+			this.schema.get(tablename).getAssumedColumnSet().addAll(setY);
+			return;
+		}
 		if(setX.size() > setY.size()) {
 			this.schema.put(tablename, nodeX);
 		}
