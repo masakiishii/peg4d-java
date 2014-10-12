@@ -374,7 +374,7 @@ public class Main {
 			outputMap(pego);
 			return;
 		}
-		if(OutputType.equalsIgnoreCase("pego")) {
+		if(OutputType.equalsIgnoreCase("pego") && !Relation) {
 			new Generator(OutputFileName).writePego(pego);
 		}
 		else if(OutputType.equalsIgnoreCase("json")) {

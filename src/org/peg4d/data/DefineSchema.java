@@ -42,6 +42,13 @@ public class DefineSchema {
 			String tablename   = set.getAssumedTableName();
 			map.put(tablename, set);
 		}
+		for(String key : map.keySet()) {
+			System.out.println("tablename: " + key);
+			System.out.println("--------------------------------------------------");
+			System.out.println("columns Set: " + map.get(key).getAssumedColumnSet());
+			System.out.println();
+			System.out.println();
+		}
 		return map;
 	}
 	

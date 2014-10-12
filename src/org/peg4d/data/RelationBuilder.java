@@ -84,6 +84,7 @@ public class RelationBuilder {
 		//SchemaMatcher schemamatcher = new SchemaMatcher(preschema.getSchema());
 		SchemaMatcher schemamatcher = new SchemaMatcher(definedschema);
 		schemamatcher.match(root);
+		
 		System.out.println("----------------------------------------");
 	}
 }
