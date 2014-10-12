@@ -85,14 +85,20 @@ public class SchemaMatcher {
 	private void getTupleData(ParsingObject subnode, ParsingObject tablenode, String tablename, SubNodeDataSet columns) {
 		ArrayList<ArrayList<String>> tabledata = this.table.get(tablename);
 		ArrayList<String> columndata = new ArrayList<String>();
-		for(String column : columns.getAssumedColumnSet()) {
-			System.out.println("start [" + column + "] matching・・・・・");
-			System.out.println("=======================================");
-			String data = this.getColumnData(subnode, tablenode, column);
-			columndata.add(data);
-			System.out.println("---------------------------------------");
-			System.out.println();
-			System.out.println();
+		for(String column : columns.getFinalColumnSet()) {
+			if(column.equals("OBJECTID")) {
+				columndata.add(String.valueOf(subnode.getObjectId()));
+				continue;
+			}
+			else {
+				System.out.println("start [" + column + "] matching・・・・・");
+				System.out.println("=======================================");
+				String data = this.getColumnData(subnode, tablenode, column);
+				columndata.add(data);
+				System.out.println("---------------------------------------");
+				System.out.println();
+				System.out.println();
+			}
 		}
 		tabledata.add(columndata);
 	}

@@ -15,6 +15,7 @@ public class SubNodeDataSet  implements Comparator {
 	private Point           subNodePoint       = null;
 	private String          assumedTableName   = null;
 	private Set<String>     assumedColumnSet   = null;
+	private Set<String>     finalColumnSet     = null;
 	private int             assumedTableNodeId = -1;
 	private double          jaccardCoefficient = -1;
 
@@ -25,6 +26,7 @@ public class SubNodeDataSet  implements Comparator {
 		this.subNodePoint     = new Point(subNode.getLpos(), subNode.getRpos());
 		this.assumedTableName = assumedTableName;
 		this.assumedColumnSet = new LinkedHashSet<String>();
+		this.finalColumnSet   = new LinkedHashSet<String>();
 		this.assumedTableNodeId   = assumedTableId;
 	}
 	public SubNodeDataSet() {
@@ -73,5 +75,14 @@ public class SubNodeDataSet  implements Comparator {
 	}
 	public double getJaccardCoefficient() {
 		return this.jaccardCoefficient;
+	}
+	public void setFinalColumnSet(String headcolumn) {
+		this.finalColumnSet.add(headcolumn);
+	}
+	public void setFinalColumnSet(Set<String> set) {
+		this.finalColumnSet.addAll(set);
+	}
+	public Set<String> getFinalColumnSet() {
+		return this.finalColumnSet;
 	}
 }

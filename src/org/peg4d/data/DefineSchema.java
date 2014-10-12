@@ -4,6 +4,8 @@ import org.peg4d.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -36,7 +38,7 @@ public class DefineSchema {
 	}
 	
 	private Map<String, SubNodeDataSet> buildMap(ArrayList<SubNodeDataSet> list) {
-		Map<String, SubNodeDataSet> map = new HashMap<String, SubNodeDataSet>();
+		Map<String, SubNodeDataSet> map = new LinkedHashMap<String, SubNodeDataSet>();
 		for(int i = 0; i < list.size(); i++) {
 			SubNodeDataSet set = list.get(i);
 			String tablename   = set.getAssumedTableName();
@@ -45,7 +47,12 @@ public class DefineSchema {
 		for(String key : map.keySet()) {
 			System.out.println("tablename: " + key);
 			System.out.println("--------------------------------------------------");
-			System.out.println("columns Set: " + map.get(key).getAssumedColumnSet());
+			SubNodeDataSet subnodeset = map.get(key);
+			Set<String> preset = subnodeset.getAssumedColumnSet();
+			subnodeset.setFinalColumnSet("OBJECTID");
+			subnodeset.setFinalColumnSet(preset);
+			Set<String> postset = subnodeset.getFinalColumnSet();
+			System.out.println("columns Set: " + postset);
 			System.out.println();
 			System.out.println();
 		}

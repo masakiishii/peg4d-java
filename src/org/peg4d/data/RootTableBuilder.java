@@ -50,12 +50,11 @@ public class RootTableBuilder {
 		return sbuf.toString();
 	}
 	
-	private void setTableData(ParsingObject node) {
-		System.out.println(this.interpolateSlash(this.pathstack));
+	private void generateRootTableCSV(ParsingObject node) {
+		System.out.print(this.interpolateSlash(this.pathstack) + ",");
 		String top = this.pathstack.pop();
 		ArrayList<String> datalist = this.datalist.get(top);
-		System.out.println(datalist);
-		datalist.clear();
+		System.out.println(datalist + ",");
 		if(this.pathstack.size() > 0) {
 			String parent = this.pathstack.peek();
 			ArrayList<String> parentdatalist = this.datalist.get(parent);
@@ -80,12 +79,19 @@ public class RootTableBuilder {
 			this.buildRootTable(node.get(i), depthlevel + 1);
 		}
 		if(this.posid.contains(node.getObjectId())) {
-			this.setTableData(node);
+			this.generateRootTableCSV(node);
 		}
 	}
 	
+	private void generateRootColumns() {
+		for(int i = 0; i < this.schema.size(); i++) {
+			System.out.print(this.schema.get(i) + ",");
+		}
+		System.out.println();
+	}
 	public void build(ParsingObject node) {
 		int depthlevel = 0;
+		this.generateRootColumns();
 		this.buildRootTable(node, depthlevel);
 	}
 }

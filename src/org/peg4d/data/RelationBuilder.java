@@ -36,7 +36,7 @@ public class RelationBuilder {
 		}
 	}
 	
-	private void breadthFirstSearch(ParsingObject root) {
+	private void recollectAllSubNode(ParsingObject root) {
 		if(root == null) return;
 		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
 		queue.offer(root);
@@ -75,7 +75,7 @@ public class RelationBuilder {
 	public void build() {
 		DomainBuilder domainbuilder = new DomainBuilder();
 		domainbuilder.build(root);
-		this.breadthFirstSearch(root);
+		this.recollectAllSubNode(root);
 		//this.showSubNodeSet();
 		NominateSchema preschema = new NominateSchema(this);
 		preschema.nominating();

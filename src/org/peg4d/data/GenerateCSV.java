@@ -27,7 +27,7 @@ public class GenerateCSV {
 	private void generateColumns(String tablename, SchemaMatcher matcher) {
 		SubNodeDataSet columns  = matcher.getSchema().get(tablename);
 		StringBuffer   buffer   = new StringBuffer();
-		for(String column : columns.getAssumedColumnSet()) {
+		for(String column : columns.getFinalColumnSet()) {
 			buffer.append(column);
 			buffer.append(",");
 		}

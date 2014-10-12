@@ -5,6 +5,7 @@ import org.peg4d.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +15,7 @@ public class NominateSchema {
 	private Map<String, SubNodeDataSet> schema = null;
 	public NominateSchema(RelationBuilder relationbuilder) {
 		this.relationbuilder = relationbuilder;
-		this.schema = new HashMap<String, SubNodeDataSet>();
+		this.schema = new LinkedHashMap<String, SubNodeDataSet>();
 	}
 	
 	private Set<String> calcIntersection(Set<String> setX, Set<String> setY) {
