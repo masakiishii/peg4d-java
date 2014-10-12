@@ -11,10 +11,10 @@ public class ParsingObject extends AbstractList<ParsingObject> {
 	private ParsingTag       tag;
 	private Object           value  = null;
 	ParsingObject            parent = null;
-	private ParsingObject    AST[] = null;
-	private int              lpos  = -1;
-	private int              rpos  = -1;
-	
+	private ParsingObject    AST[]  = null;
+	private int              lpos    = -1;
+	private int              rpos    = -1;
+	private boolean          visited = false;
 
 	public ParsingObject(ParsingTag tag, ParsingSource source, long pospeg) {
 		this.oid = idCount++;
@@ -56,6 +56,14 @@ public class ParsingObject extends AbstractList<ParsingObject> {
 
 	public int getRpos() {
 		return this.rpos;
+	}
+	
+	public void visited() {
+		this.visited = true;
+	}
+	
+	public boolean visitedNode() {
+		return this.visited;
 	}
 	
 	public final ParsingObject getParent() {

@@ -13,11 +13,13 @@ public class SchemaMatcher {
 	private Map<String, SubNodeDataSet>               schema    = null;
 	private Map<String, ArrayList<ArrayList<String>>> table     = null;
 	private GenerateCSV                               generator = null;
+	private RootTableBuilder                          builder   = null;
 	public SchemaMatcher(Map<String, SubNodeDataSet> schema) {
 		this.schema = new HashMap<String, SubNodeDataSet>();
 		this.schema = schema;
 		this.initTable();
 		this.generator = new GenerateCSV();
+		this.builder   = new RootTableBuilder();
 	}
 	
 	private void initTable() {
@@ -47,18 +49,15 @@ public class SchemaMatcher {
 					ParsingObject sibling = parent.get(i);
 					String linefeed = System.getProperty("line.separator");
 					if(sibling.size() == 0) {
-						//sbuf.append(sibling.getText().toString());
 						String data = sibling.getText().toString();
-						if(data.length() > 36) {
+						if(data.length() > 128) {
 							sbuf.append("{too long text}");
 						}
 						else {
-							//sbuf.append(sibling.getText().toString().replaceAll("\r\n\t", ""));
 							sbuf.append(sibling.getText().toString().replaceAll(linefeed, "").replaceAll("  ", ""));
 						}
 					}
 					else {
-						//sbuf.append(sibling.get(0).getText().toString().replaceAll("\r\n\t", ""));
 						sbuf.append(sibling.get(0).getText().toString().replaceAll(linefeed, "").replaceAll("  ", ""));
 						sbuf.append(":");
 						sbuf.append(sibling.getObjectId());
@@ -113,6 +112,7 @@ public class SchemaMatcher {
 			if(child.size() == 0 && this.isTableName(child.getText().toString())) {
 				String tablename = child.getText().toString();
 				this.getTupleData(parent, child, tablename, this.schema.get(tablename));
+				parent.visited();
 				continue;
 			}
 			for(int index = 0; index < parent.size(); index++) {
@@ -123,6 +123,7 @@ public class SchemaMatcher {
 	
 	public void match(ParsingObject root) {
 		this.matching(root);
+		this.builder.build(root);
 		this.generator.generateCSV(this);
 	}
 }
