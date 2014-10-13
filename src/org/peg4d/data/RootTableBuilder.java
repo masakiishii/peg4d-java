@@ -41,6 +41,7 @@ public class RootTableBuilder {
 			ParsingObject sibling = parent.get(i);
 			if(sibling.size() == 0) {
 				sbuf.append(sibling.getText().toString());
+				sibling.visited();
 			}
 			else {
 				ParsingObject grandchild = sibling.get(0);
@@ -78,7 +79,18 @@ public class RootTableBuilder {
 		}
 		System.out.println();
 	}
+	
+	private void show(ParsingObject node) {
+		if(node == null) return;
+		if(node.size() == 0 && !node.visitedNode()) {
+			System.out.println("nodeID: " + this.rbuilder.getObjectId(node) +  ", " + node.getText().toString());
+		}
+		for(int i = 0; i < node.size(); i++) {
+			this.show(node.get(i));
+		}
+	}
 	public void build(ParsingObject node) {
+		this.show(node);
 		this.generateRootColumns();
 		this.buildRootTable(node);
 		for(String key : this.table.keySet()) {

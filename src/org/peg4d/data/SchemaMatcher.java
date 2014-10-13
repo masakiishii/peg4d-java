@@ -42,13 +42,15 @@ public class SchemaMatcher {
 		if(subnode == null) return null;
 		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
 		queue.offer(subnode);
+		StringBuffer sbuf = new StringBuffer();
 		while(!queue.isEmpty()) {
 			ParsingObject node = queue.poll();
 			if(node.getText().toString().equals(column)) {
+				node.visited();
 				ParsingObject parent = node.getParent();
-				StringBuffer sbuf = new StringBuffer();
 				for(int i = 1; i < parent.size(); i++) {
 					ParsingObject sibling = parent.get(i);
+					sibling.visited();
 					String linefeed = System.getProperty("line.separator");
 					if(sibling.size() == 0) {
 						String data = sibling.getText().toString();
@@ -60,28 +62,37 @@ public class SchemaMatcher {
 						}
 					}
 					else {
-						sbuf.append(sibling.get(0).getText().toString().replaceAll(linefeed, "").replaceAll("  ", ""));
-						sbuf.append(":");
-						sbuf.append(this.rbuilder.getObjectId(sibling));
+						if(sibling.getTag().toString().equals("List")) { // FIX ME
+							for(int j = 0; j < sibling.size(); j++) {
+								sibling.get(j).visited();
+								sbuf.append(sibling.get(j).getText().toString());
+								if(j != sibling.size() - 1) sbuf.append(",");
+							}
+						}
+						else {
+							sibling.get(0).visited();
+							sbuf.append(sibling.get(0).getText().toString().replaceAll(linefeed, "").replaceAll("  ", ""));
+							sbuf.append(":");
+							sbuf.append(this.rbuilder.getObjectId(sibling));
+						}
 					}
-					if(i == parent.size() - 1) {
-						System.out.println("column: " + column);
-						System.out.println("data:   " + sbuf.toString());
-						//return sbuf.toString();
-						return "[" + sbuf.toString() + "]";
-					}
-					else {
-						sbuf.append(",");
-					}
+					sbuf.append(",");
 				}				
 			}
 			for(int index = 0; index < node.size(); index++) {
 				if(!node.equals(tablenode)) queue.offer(node.get(index));
 			}
 		}
-		System.out.println("column: " + column);
-		System.out.println("data:   " + null);
-		return null;
+		if(sbuf.length() > 0) {
+			System.out.println("column: " + column);
+			System.out.println("data:   " + sbuf.toString());
+			return "[" + sbuf.toString() + "]";
+		}
+		else {
+			System.out.println("column: " + column);
+			System.out.println("data:   " + null);
+			return null;
+		}
 	}
 	
 	private void getTupleData(ParsingObject subnode, ParsingObject tablenode, String tablename, SubNodeDataSet columns) {
@@ -118,6 +129,7 @@ public class SchemaMatcher {
 			if(parent.size() == 0) continue;
 			ParsingObject child  = parent.get(0);
 			if(child.size() == 0 && this.isTableName(child.getText().toString())) {
+				child.visited();
 				String tablename = child.getText().toString();
 				this.getTupleData(parent, child, tablename, this.schema.get(tablename));
 				parent.visited();
