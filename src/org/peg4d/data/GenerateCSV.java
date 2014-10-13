@@ -8,7 +8,6 @@ public class GenerateCSV {
 		
 	}
 	
-	
 	private void generateData(String tablename, SchemaMatcher matcher) {
 		ArrayList<ArrayList<String>> datalist = matcher.getTable().get(tablename);
 		StringBuffer   buffer   = new StringBuffer();

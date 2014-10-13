@@ -20,28 +20,38 @@ public class RootTableBuilder {
 	}
 	
 	private void initSchema() {
-		this.schema.add("KEY");
+		this.schema.add("OBJECTID");
+		this.schema.add("COLUMN");
 		this.schema.add("VALUE");
-	}
-	private String interpolateSlash(Stack<String> pathstack) {
-		StringBuffer sbuf = new StringBuffer();
-		for(int i = 0; i < pathstack.size(); i++) {
-			sbuf.append("/");
-			sbuf.append(pathstack.elementAt(i));
-		}
-		return sbuf.toString();
 	}
 	
 	private void setTableData(ParsingObject node) {
 		ParsingObject parent = node.getParent();
-		String key = node.getText().toString();
+		String key = String.valueOf(this.rbuilder.getObjectId(parent));
+		String column = node.getText().toString();
 		StringBuffer sbuf = new StringBuffer();
+		sbuf.append(column);
+		sbuf.append(",");
 		sbuf.append("[");
 		for(int i = 1; i < parent.size(); i++) {
 			ParsingObject sibling = parent.get(i);
 			if(sibling.size() == 0) {
 				sbuf.append(sibling.getText().toString());
 				sibling.visited();
+			}
+			else if(sibling.getTag().toString().equals("List")) {
+				for(int j = 0; j < sibling.size(); j++) {
+					if(sibling.get(j).size() == 0) {
+						sibling.get(j).visited();
+						sbuf.append(sibling.get(j).getText().toString());
+					}
+					else {
+						sbuf.append(sibling.get(j).getTag().toString());
+						sbuf.append(":");
+						sbuf.append(this.rbuilder.getObjectId(sibling.get(j)));
+					}
+					if(j != sibling.size() - 1) sbuf.append(",");
+				}
 			}
 			else {
 				ParsingObject grandchild = sibling.get(0);
@@ -80,21 +90,15 @@ public class RootTableBuilder {
 		System.out.println();
 	}
 	
-	private void show(ParsingObject node) {
-		if(node == null) return;
-		if(node.size() == 0 && !node.visitedNode()) {
-			System.out.println("nodeID: " + this.rbuilder.getObjectId(node) +  ", " + node.getText().toString());
-		}
-		for(int i = 0; i < node.size(); i++) {
-			this.show(node.get(i));
-		}
-	}
 	public void build(ParsingObject node) {
-		this.show(node);
 		this.generateRootColumns();
 		this.buildRootTable(node);
 		for(String key : this.table.keySet()) {
 			System.out.println(key + "," + this.table.get(key));
 		}
+		System.out.println("----------------------------------");
+		System.out.println();
+		System.out.println();
+		System.out.println();
 	}
 }

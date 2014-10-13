@@ -62,7 +62,7 @@ public class SchemaMatcher {
 						}
 					}
 					else {
-						if(sibling.getTag().toString().equals("List")) { // FIX ME
+						if(sibling.getTag().toString().equals("List")) { // FIXME
 							for(int j = 0; j < sibling.size(); j++) {
 								sibling.get(j).visited();
 								sbuf.append(sibling.get(j).getText().toString());
