@@ -82,7 +82,7 @@ public class RelationBuilder {
 		DefineSchema defineschema = new DefineSchema(preschema, root);
 		Map<String, SubNodeDataSet> definedschema = defineschema.define();
 		//SchemaMatcher schemamatcher = new SchemaMatcher(preschema.getSchema());
-		SchemaMatcher schemamatcher = new SchemaMatcher(definedschema);
+		SchemaMatcher schemamatcher = new SchemaMatcher(this, definedschema);
 		schemamatcher.match(root);
 		
 		System.out.println("----------------------------------------");

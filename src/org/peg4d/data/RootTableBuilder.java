@@ -4,43 +4,25 @@ import org.peg4d.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Stack;
 
 public class RootTableBuilder {
+	private RelationBuilder rbuilder   = null;
 	private ArrayList<String> schema   = null;
-	private Map<String, ArrayList<ArrayList<String>>> table = null;
-	private Stack<String> pathstack    = null;
-	private ArrayList<Integer> posid   = null;
-	private Map<String, ArrayList<String>> datalist = null;
-	public RootTableBuilder() {
+	private Map<String, String> table = null;
+	public RootTableBuilder(RelationBuilder rbuilder) {
+		this.rbuilder  = rbuilder;
 		this.schema    = new ArrayList<String>();
+		this.table     = new LinkedHashMap<String, String>();
 		this.initSchema();
-		this.initTable();
-		this.pathstack = new Stack<String>();
-		this.posid     = new ArrayList<Integer>();
-		this.datalist  = new HashMap<String, ArrayList<String>>();
 	}
 	
 	private void initSchema() {
-		this.schema.add("PATH");
+		this.schema.add("KEY");
 		this.schema.add("VALUE");
 	}
-	private void initTable() {
-		this.table = new HashMap<String, ArrayList<ArrayList<String>>>();
-		for(int i = 0; i < this.schema.size(); i++) {
-			this.table.put(this.schema.get(i), new ArrayList<ArrayList<String>>());
-		}
-	}
-	
-	private void setNodeData(ParsingObject node) {
-		String data = node.get(0).getText().toString();
-		int    oid  = node.get(0).getObjectId();
-		ParsingObject parent = node.getParent();
-		ArrayList<String> datalist = this.datalist.get(parent.get(0).getText().toString());
-		datalist.add(data + ":" + oid);
-	}
-	
 	private String interpolateSlash(Stack<String> pathstack) {
 		StringBuffer sbuf = new StringBuffer();
 		for(int i = 0; i < pathstack.size(); i++) {
@@ -50,36 +32,43 @@ public class RootTableBuilder {
 		return sbuf.toString();
 	}
 	
-	private void generateRootTableCSV(ParsingObject node) {
-		System.out.print(this.interpolateSlash(this.pathstack) + ",");
-		String top = this.pathstack.pop();
-		ArrayList<String> datalist = this.datalist.get(top);
-		System.out.println(datalist + ",");
-		if(this.pathstack.size() > 0) {
-			String parent = this.pathstack.peek();
-			ArrayList<String> parentdatalist = this.datalist.get(parent);
-			parentdatalist.add(top + ":" + node.getObjectId());
+	private void setTableData(ParsingObject node) {
+		ParsingObject parent = node.getParent();
+		String key = node.getText().toString();
+		StringBuffer sbuf = new StringBuffer();
+		sbuf.append("[");
+		for(int i = 1; i < parent.size(); i++) {
+			ParsingObject sibling = parent.get(i);
+			if(sibling.size() == 0) {
+				sbuf.append(sibling.getText().toString());
+			}
+			else {
+				ParsingObject grandchild = sibling.get(0);
+				if(grandchild.size() == 0) {
+					sbuf.append(grandchild.getText().toString());
+				}
+				else {
+					sbuf.append(sibling.getTag().toString());
+				}
+				sbuf.append(":");
+				sbuf.append(this.rbuilder.getObjectId(sibling));
+			}
+			if(i != parent.size() - 1) sbuf.append(",");
 		}
+		sbuf.append("]");
+		this.table.put(key, sbuf.toString());
 	}
 	
-	private void buildRootTable(ParsingObject node, int depthlevel) {
+	private void buildRootTable(ParsingObject node) {
 		if(node == null) return;
 		if(node.visitedNode()) {
-			this.setNodeData(node);
 			return;
 		}
 		if(node.size() == 0 && !node.visitedNode()) {
-			String pathvalue = node.getText().toString();
-			ArrayList<String> list = new ArrayList<String>();
-			this.pathstack.push(pathvalue);
-			this.posid.add(node.getParent().getObjectId());
-			this.datalist.put(pathvalue, list);
+			this.setTableData(node);
 		}
 		for(int i = 0; i < node.size(); i++) {
-			this.buildRootTable(node.get(i), depthlevel + 1);
-		}
-		if(this.posid.contains(node.getObjectId())) {
-			this.generateRootTableCSV(node);
+			this.buildRootTable(node.get(i));
 		}
 	}
 	
@@ -90,8 +79,10 @@ public class RootTableBuilder {
 		System.out.println();
 	}
 	public void build(ParsingObject node) {
-		int depthlevel = 0;
 		this.generateRootColumns();
-		this.buildRootTable(node, depthlevel);
+		this.buildRootTable(node);
+		for(String key : this.table.keySet()) {
+			System.out.println(key + "," + this.table.get(key));
+		}
 	}
 }

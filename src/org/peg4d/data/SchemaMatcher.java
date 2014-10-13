@@ -10,16 +10,18 @@ import java.util.Set;
 import org.peg4d.*;
 
 public class SchemaMatcher {
+	private RelationBuilder                           rbuilder  = null;
 	private Map<String, SubNodeDataSet>               schema    = null;
 	private Map<String, ArrayList<ArrayList<String>>> table     = null;
 	private GenerateCSV                               generator = null;
 	private RootTableBuilder                          builder   = null;
-	public SchemaMatcher(Map<String, SubNodeDataSet> schema) {
+	public SchemaMatcher(RelationBuilder rbuilder, Map<String, SubNodeDataSet> schema) {
+		this.rbuilder = rbuilder;
 		this.schema = new HashMap<String, SubNodeDataSet>();
 		this.schema = schema;
 		this.initTable();
 		this.generator = new GenerateCSV();
-		this.builder   = new RootTableBuilder();
+		this.builder   = new RootTableBuilder(rbuilder);
 	}
 	
 	private void initTable() {
@@ -60,7 +62,7 @@ public class SchemaMatcher {
 					else {
 						sbuf.append(sibling.get(0).getText().toString().replaceAll(linefeed, "").replaceAll("  ", ""));
 						sbuf.append(":");
-						sbuf.append(sibling.getObjectId());
+						sbuf.append(this.rbuilder.getObjectId(sibling));
 					}
 					if(i == parent.size() - 1) {
 						System.out.println("column: " + column);
@@ -87,7 +89,7 @@ public class SchemaMatcher {
 		ArrayList<String> columndata = new ArrayList<String>();
 		for(String column : columns.getFinalColumnSet()) {
 			if(column.equals("OBJECTID")) {
-				columndata.add(String.valueOf(subnode.getObjectId()));
+				columndata.add(String.valueOf(this.rbuilder.getObjectId(subnode)));
 				continue;
 			}
 			else {
