@@ -45,16 +45,16 @@ public class DefineSchema {
 			map.put(tablename, set);
 		}
 		for(String key : map.keySet()) {
-			System.out.println("tablename: " + key);
-			System.out.println("--------------------------------------------------");
+			Main.DebugPrint("tablename: " + key);
+			Main.DebugPrint("--------------------------------------------------");
 			SubNodeDataSet subnodeset = map.get(key);
 			Set<String> preset = subnodeset.getAssumedColumnSet();
 			subnodeset.setFinalColumnSet("OBJECTID");
 			subnodeset.setFinalColumnSet(preset);
 			Set<String> postset = subnodeset.getFinalColumnSet();
-			System.out.println("columns Set: " + postset);
-			System.out.println();
-			System.out.println();
+			Main.DebugPrint("columns Set: " + postset);
+			Main.DebugPrint("");
+			Main.DebugPrint("");
 		}
 		return map;
 	}

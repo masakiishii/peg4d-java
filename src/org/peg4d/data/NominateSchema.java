@@ -67,9 +67,9 @@ public class NominateSchema {
 				String setXname  = list.get(i).getAssumedTableName();
 				String setYname  = list.get(j).getAssumedTableName();
 				if(setX.size() > 0 && setY.size() > 0 && setXname.equals(setYname)) {
+					Main.DebugPrint(setX);
+					Main.DebugPrint(setY);
 					double jaccardcoefficient = this.calculatiingJaccard(setX, setY);
-					//if(jaccardcoefficient > 0.5) {
-					//System.out.println(jaccardcoefficient);
 					if(jaccardcoefficient > 0.5 && jaccardcoefficient <= 1.0) {
 						this.nominateSchema(setXname, list.get(i), list.get(j), jaccardcoefficient);
 					}

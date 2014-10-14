@@ -68,6 +68,9 @@ public class Main {
 	
 	// --relation
 	public static boolean Relation = false;
+	
+	//--debug
+	public static boolean RelationDebug = false;
 
 	// --memo:no
 //	public static String  ParserName = null;
@@ -158,6 +161,9 @@ public class Main {
 			}
 			else if (argument.equals("--relation")) {
 				Relation = true;
+			}
+			else if (argument.equals("--debug")) {
+				RelationDebug = true;
 			}
 			else if(argument.startsWith("--test")) {
 				TestMode = true;
@@ -637,6 +643,13 @@ public class Main {
 //		System.err.print(msg);
 //	}
 
+	//for Relation    //--debug
+	public final static void DebugPrint(Object message) {
+		if(Main.RelationDebug) {
+			System.out.println(message);
+		}
+	}
+	
 	public final static void _PrintLine(Object message) {
 		System.err.println(message);
 	}

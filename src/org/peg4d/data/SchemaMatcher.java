@@ -84,13 +84,13 @@ public class SchemaMatcher {
 			}
 		}
 		if(sbuf.length() > 0) {
-			System.out.println("column: " + column);
-			System.out.println("data:   " + sbuf.toString());
+			Main.DebugPrint("column: " + column);
+			Main.DebugPrint("data:   " + sbuf.toString());
 			return "[" + sbuf.toString() + "]";
 		}
 		else {
-			System.out.println("column: " + column);
-			System.out.println("data:   " + null);
+			Main.DebugPrint("column: " + column);
+			Main.DebugPrint("data:   " + null);
 			return null;
 		}
 	}
@@ -104,13 +104,13 @@ public class SchemaMatcher {
 				continue;
 			}
 			else {
-				System.out.println("start [" + column + "] matching・・・・・");
-				System.out.println("=======================================");
+				Main.DebugPrint("start [" + column + "] matching・・・・・");
+				Main.DebugPrint("=======================================");
 				String data = this.getColumnData(subnode, tablenode, column);
 				columndata.add(data);
-				System.out.println("---------------------------------------");
-				System.out.println();
-				System.out.println();
+				Main.DebugPrint("---------------------------------------");
+				Main.DebugPrint("");
+				Main.DebugPrint("");
 			}
 		}
 		tabledata.add(columndata);

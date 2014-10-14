@@ -66,7 +66,7 @@ public class RootTableBuilder {
 			}
 			if(i != parent.size() - 1) sbuf.append(",");
 		}
-		sbuf.append("]");
+		sbuf.append("],");
 		this.table.put(key, sbuf.toString());
 	}
 	
