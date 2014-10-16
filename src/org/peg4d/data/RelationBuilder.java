@@ -46,7 +46,7 @@ public class RelationBuilder {
 				ParsingObject assumedtablenode = node.get(0);
 				String value = assumedtablenode.getText();
 				if(!this.isNumber(value)) {
-					//System.out.println("id: " + this.getObjectId(node.get(0)) + ", " + value);
+					Main.DebugPrint("id: " + this.getObjectId(node.get(0)) + ", " + value);
 					SubNodeDataSet subnodeset
 						= new SubNodeDataSet(this, node, value, this.getObjectId(assumedtablenode));
 					subnodeset.buildAssumedColumnSet();
@@ -63,12 +63,12 @@ public class RelationBuilder {
 		for(int i = 0; i < this.allsubnodesetlist.size(); i++) {
 			SubNodeDataSet subnodedata = this.allsubnodesetlist.get(i);
 			Set<String> subnodeset     = subnodedata.getAssumedColumnSet();
-			System.out.println("tableName: " + subnodedata.getAssumedTableName());
-			System.out.println("-----------------------------------------------");
+			Main.DebugPrint("tableName: " + subnodedata.getAssumedTableName());
+			Main.DebugPrint("-----------------------------------------------");
 			for(String element : subnodeset) {
-				System.out.println(element);
+				Main.DebugPrint(element);
 			}
-			System.out.println("\n");
+			Main.DebugPrint("\n");
 		}
 	}
 
@@ -76,15 +76,13 @@ public class RelationBuilder {
 		DomainBuilder domainbuilder = new DomainBuilder();
 		domainbuilder.build(root);
 		this.recollectAllSubNode(root);
-		//this.showSubNodeSet();
+		this.showSubNodeSet();
 		NominateSchema preschema = new NominateSchema(this);
 		preschema.nominating();
 		DefineSchema defineschema = new DefineSchema(preschema, root);
 		Map<String, SubNodeDataSet> definedschema = defineschema.define();
-		//SchemaMatcher schemamatcher = new SchemaMatcher(preschema.getSchema());
 		SchemaMatcher schemamatcher = new SchemaMatcher(this, definedschema);
 		schemamatcher.match(root);
-		
-		System.out.println("----------------------------------------");
+		Main.DebugPrint("--------------------------------------------------");
 	}
 }

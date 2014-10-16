@@ -50,7 +50,7 @@ public class RootTableBuilder {
 						sbuf.append(":");
 						sbuf.append(this.rbuilder.getObjectId(sibling.get(j)));
 					}
-					if(j != sibling.size() - 1) sbuf.append(",");
+					if(j != sibling.size() - 1) sbuf.append("|");
 				}
 			}
 			else {
@@ -64,7 +64,7 @@ public class RootTableBuilder {
 				sbuf.append(":");
 				sbuf.append(this.rbuilder.getObjectId(sibling));
 			}
-			if(i != parent.size() - 1) sbuf.append(",");
+			if(i != parent.size() - 1) sbuf.append("|");
 		}
 		sbuf.append("],");
 		this.table.put(key, sbuf.toString());

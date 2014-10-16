@@ -58,7 +58,7 @@ public class SchemaMatcher {
 							sbuf.append("{too long text}");
 						}
 						else {
-							sbuf.append(sibling.getText().toString().replaceAll(linefeed, "").replaceAll("  ", ""));
+							sbuf.append(data.replaceAll(linefeed, "").replaceAll("  ", "").replace(",", " "));
 						}
 					}
 					else {
@@ -66,17 +66,17 @@ public class SchemaMatcher {
 							for(int j = 0; j < sibling.size(); j++) {
 								sibling.get(j).visited();
 								sbuf.append(sibling.get(j).getText().toString());
-								if(j != sibling.size() - 1) sbuf.append(",");
+								if(j != sibling.size() - 1) sbuf.append("|");
 							}
 						}
 						else {
 							sibling.get(0).visited();
-							sbuf.append(sibling.get(0).getText().toString().replaceAll(linefeed, "").replaceAll("  ", ""));
+							sbuf.append(sibling.get(0).getText().toString().replaceAll(linefeed, "").replaceAll("  ", "").replace(",", " "));
 							sbuf.append(":");
 							sbuf.append(this.rbuilder.getObjectId(sibling));
 						}
 					}
-					sbuf.append(",");
+					if(i != parent.size() - 1) sbuf.append("|");
 				}				
 			}
 			for(int index = 0; index < node.size(); index++) {
