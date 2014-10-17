@@ -1,12 +1,10 @@
 package org.peg4d.data;
 
-import org.peg4d.*;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Stack;
+
+import org.peg4d.ParsingObject;
 
 public class RootTableBuilder {
 	private RelationBuilder rbuilder   = null;
@@ -50,7 +48,9 @@ public class RootTableBuilder {
 						sbuf.append(":");
 						sbuf.append(this.rbuilder.getObjectId(sibling.get(j)));
 					}
-					if(j != sibling.size() - 1) sbuf.append("|");
+					if(j != sibling.size() - 1) {
+						sbuf.append("|");
+					}
 				}
 			}
 			else {
@@ -64,14 +64,18 @@ public class RootTableBuilder {
 				sbuf.append(":");
 				sbuf.append(this.rbuilder.getObjectId(sibling));
 			}
-			if(i != parent.size() - 1) sbuf.append("|");
+			if(i != parent.size() - 1) {
+				sbuf.append("|");
+			}
 		}
 		sbuf.append("],");
 		this.table.put(key, sbuf.toString());
 	}
 	
 	private void buildRootTable(ParsingObject node) {
-		if(node == null) return;
+		if(node == null) {
+			return;
+		}
 		if(node.visitedNode()) {
 			return;
 		}

@@ -1,25 +1,28 @@
 package org.peg4d.data;
 
-import java.util.Comparator;
 
 public class Point {
-	private int ltpos = -1;
-	private int rtpos = -1;
-	private int range = -1;
-	
-	public Point(int ltpos, int rtpos) {
-		this.ltpos = ltpos;
-		this.rtpos = rtpos;
-		this.range = rtpos - ltpos;
+	final private int left;
+	final private int right;
+
+	public Point(int left, int right) {
+		this.left = left;
+		this.right = right;
 	}
-	
-	public int getLtPos() {
-		return this.ltpos;
+
+	public int getLeft() {
+		return this.left;
 	}
-	public int getRtPos() {
-		return this.rtpos;
+
+	public int getRight() {
+		return this.right;
 	}
+
 	public int getRange() {
-		return this.range;
+		return this.right - this.left;
+	}
+
+	public boolean contains(Point p) {
+		return (p.left < this.left && this.right < p.right);
 	}
 }

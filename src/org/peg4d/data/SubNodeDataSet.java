@@ -1,16 +1,14 @@
 package org.peg4d.data;
 
-import org.peg4d.*;
-
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
+import org.peg4d.ParsingObject;
+
 public class SubNodeDataSet  implements Comparator {
-	private RelationBuilder relationbuilder    = null;
 	private ParsingObject   subNode            = null;
 	private Point           subNodePoint       = null;
 	private String          assumedTableName   = null;
@@ -19,9 +17,8 @@ public class SubNodeDataSet  implements Comparator {
 	private int             assumedTableNodeId = -1;
 	private double          jaccardCoefficient = -1;
 
-	public SubNodeDataSet(RelationBuilder relationbuilder, 
-				ParsingObject subNode, String assumedTableName, int assumedTableId) {
-		this.relationbuilder  = relationbuilder;
+	public SubNodeDataSet(ParsingObject subNode, String assumedTableName,
+			int assumedTableId) {
 		this.subNode          = subNode;
 		this.subNodePoint     = new Point(subNode.getLpos(), subNode.getRpos());
 		this.assumedTableName = assumedTableName;
@@ -30,7 +27,7 @@ public class SubNodeDataSet  implements Comparator {
 		this.assumedTableNodeId   = assumedTableId;
 	}
 	public SubNodeDataSet() {
-		
+
 	}
 	@Override
 	public int compare(Object o1, Object o2) {
@@ -40,15 +37,17 @@ public class SubNodeDataSet  implements Comparator {
 	}
 
 	public void buildAssumedColumnSet() {
-		if(this.subNode == null) return;
+		if(this.subNode == null) {
+			return;
+		}
 		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
 		queue.offer(this.subNode);
 		while(!queue.isEmpty()) {
 			ParsingObject node = queue.poll();
 			if(node.size() != 0 && node.get(0).size() == 0
-					&& this.relationbuilder.getObjectId(node.get(0)) != this.assumedTableNodeId) {
+					&& RelationBuilder.getObjectId(node.get(0)) != this.assumedTableNodeId) {
 				String value = node.get(0).getText();
-				if(!this.relationbuilder.isNumber(value)) {
+				if (!RelationBuilder.isNumber(value)) {
 					this.assumedColumnSet.add(value);
 				}
 			}
@@ -57,7 +56,7 @@ public class SubNodeDataSet  implements Comparator {
 			}
 		}
 	}
-	
+
 	public Point getPoint() {
 		return this.subNodePoint;
 	}
@@ -84,5 +83,9 @@ public class SubNodeDataSet  implements Comparator {
 	}
 	public Set<String> getFinalColumnSet() {
 		return this.finalColumnSet;
+	}
+
+	public boolean contains(Point p) {
+		return this.getPoint().contains(p);
 	}
 }
