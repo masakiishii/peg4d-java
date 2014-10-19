@@ -1,21 +1,18 @@
 package org.peg4d.data;
 
-import org.peg4d.*;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
+
+import org.peg4d.Main;
+import org.peg4d.ParsingObject;
 
 public class DefineSchema {
 	private NominateSchema nominatedschema      = null;
 	private SchemaTypeChecker schematypechecker = null;
 	private ParsingObject root                  = null;
-	
+
 	public DefineSchema(NominateSchema nominatedschema, ParsingObject root) {
 		this.nominatedschema   = nominatedschema;
 		this.schematypechecker = new SchemaTypeChecker();
@@ -23,9 +20,9 @@ public class DefineSchema {
 	}
 
 	private boolean isSubTree(SubNodeDataSet subnodedatasetX, SubNodeDataSet subnodedatasetY) {
- 		return this.schematypechecker.check(root, subnodedatasetX, subnodedatasetY);
+		return this.schematypechecker.check(this.root, subnodedatasetX, subnodedatasetY);
 	}
-	
+
 	private ArrayList<SubNodeDataSet> sortNominatedSchemaTable() {
 		Map<String, SubNodeDataSet> schema = this.nominatedschema.getSchema();
 		ArrayList<SubNodeDataSet> list = new ArrayList<SubNodeDataSet>();
@@ -36,7 +33,7 @@ public class DefineSchema {
 		list.sort(new SubNodeDataSet());
 		return list;
 	}
-	
+
 	private Map<String, SubNodeDataSet> buildMap(ArrayList<SubNodeDataSet> list) {
 		Map<String, SubNodeDataSet> map = new LinkedHashMap<String, SubNodeDataSet>();
 		for(int i = 0; i < list.size(); i++) {
@@ -58,26 +55,28 @@ public class DefineSchema {
 		}
 		return map;
 	}
-	
+
 	private Map<String, SubNodeDataSet> defineSchema() {
 		ArrayList<SubNodeDataSet> sortedschemalist = this.sortNominatedSchemaTable();
-		for(int i = 0; i < sortedschemalist.size(); i++) {
-			SubNodeDataSet subnodedatasetX = sortedschemalist.get(i);
-			ParsingObject  subnodeX = sortedschemalist.get(i).getSubNode();
-			for(int j = 0; j < sortedschemalist.size(); j++) {
-				SubNodeDataSet subnodedatasetY = sortedschemalist.get(j);
-				ParsingObject subnodeY = subnodedatasetY.getSubNode();
-				String column = subnodedatasetY.getAssumedTableName();
-				if(this.isSubTree(subnodedatasetX, subnodedatasetY)) {
-					sortedschemalist.remove(subnodedatasetY);
-					i = 0;
-					j = 0;
+		if (sortedschemalist.size() > 1) {
+			for(int i = 0; i < sortedschemalist.size(); i++) {
+				SubNodeDataSet subnodedatasetX = sortedschemalist.get(i);
+				ParsingObject  subnodeX = sortedschemalist.get(i).getSubNode();
+				for(int j = 0; j < sortedschemalist.size(); j++) {
+					SubNodeDataSet subnodedatasetY = sortedschemalist.get(j);
+					ParsingObject subnodeY = subnodedatasetY.getSubNode();
+					String column = subnodedatasetY.getAssumedTableName();
+					if(this.isSubTree(subnodedatasetX, subnodedatasetY)) {
+						sortedschemalist.remove(subnodedatasetY);
+						i = 0;
+						j = 0;
+					}
 				}
 			}
 		}
 		return this.buildMap(sortedschemalist);
 	}
-	
+
 	public Map<String, SubNodeDataSet> define() {
 		return this.defineSchema();
 	}

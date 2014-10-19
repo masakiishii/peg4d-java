@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 
-import org.peg4d.*;
+import org.peg4d.Main;
+import org.peg4d.ParsingObject;
 
 public class SchemaMatcher {
 	private RelationBuilder                           rbuilder  = null;
@@ -23,23 +23,26 @@ public class SchemaMatcher {
 		this.generator = new GenerateCSV();
 		this.builder   = new RootTableBuilder(rbuilder);
 	}
-	
+
 	private void initTable() {
 		this.table = new HashMap<String, ArrayList<ArrayList<String>>>();
 		for(String column : this.schema.keySet()) {
 			this.table.put(column, new ArrayList<ArrayList<String>>());
 		}
 	}
-	
+
 	public Map<String, ArrayList<ArrayList<String>>> getTable() {
 		return this.table;
 	}
 	public Map<String, SubNodeDataSet> getSchema() {
 		return this.schema;
 	}
-	
-	private String getColumnData(ParsingObject subnode, ParsingObject tablenode, String column) {
-		if(subnode == null) return null;
+
+	private String getColumnData(ParsingObject subnode,
+			ParsingObject tablenode, String column) {
+		if(subnode == null) {
+			return null;
+		}
 		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
 		queue.offer(subnode);
 		StringBuffer sbuf = new StringBuffer();
@@ -63,10 +66,12 @@ public class SchemaMatcher {
 					}
 					else {
 						if(sibling.getTag().toString().equals("List")) { // FIXME
-							for(int j = 0; j < sibling.size(); j++) {
+							for (int j = 0; j < sibling.size(); j++) {
 								sibling.get(j).visited();
 								sbuf.append(sibling.get(j).getText().toString());
-								if(j != sibling.size() - 1) sbuf.append("|");
+								if (j != sibling.size() - 1) {
+									sbuf.append("|");
+								}
 							}
 						}
 						else {
@@ -76,11 +81,15 @@ public class SchemaMatcher {
 							sbuf.append(this.rbuilder.getObjectId(sibling));
 						}
 					}
-					if(i != parent.size() - 1) sbuf.append("|");
-				}				
+					if(i != parent.size() - 1) {
+						sbuf.append("|");
+					}
+				}
 			}
 			for(int index = 0; index < node.size(); index++) {
-				if(!node.equals(tablenode)) queue.offer(node.get(index));
+				if(!node.equals(tablenode)) {
+					queue.offer(node.get(index));
+				}
 			}
 		}
 		if(sbuf.length() > 0) {
@@ -94,7 +103,7 @@ public class SchemaMatcher {
 			return null;
 		}
 	}
-	
+
 	private void getTupleData(ParsingObject subnode, ParsingObject tablenode, String tablename, SubNodeDataSet columns) {
 		ArrayList<ArrayList<String>> tabledata = this.table.get(tablename);
 		ArrayList<String> columndata = new ArrayList<String>();
@@ -115,23 +124,42 @@ public class SchemaMatcher {
 		}
 		tabledata.add(columndata);
 	}
-	
+
+	private void getTupleListData(ParsingObject subnode,
+			ParsingObject tablenode, String tablename, SubNodeDataSet columns) {
+		ParsingObject listnode = subnode.get(1);
+		for (int i = 0; i < listnode.size(); i++) {
+			this.getTupleData(listnode.get(i), tablenode, tablename, columns);
+		}
+	}
+
 	private boolean isTableName(String value) {
 		return this.schema.containsKey(value) ? true : false;
 	}
-	
+
 	private void matching(ParsingObject root) {
-		if(root == null) return;
+		if(root == null) {
+			return;
+		}
 		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
 		queue.offer(root);
 		while(!queue.isEmpty()) {
 			ParsingObject parent = queue.poll();
-			if(parent.size() == 0) continue;
+			if(parent.size() == 0) {
+				continue;
+			}
 			ParsingObject child  = parent.get(0);
 			if(child.size() == 0 && this.isTableName(child.getText().toString())) {
 				child.visited();
 				String tablename = child.getText().toString();
-				this.getTupleData(parent, child, tablename, this.schema.get(tablename));
+				if (parent.get(1).getTag().toString().equals("List")) {
+					this.getTupleListData(parent, child, tablename,
+							this.schema.get(tablename));
+				} else {
+					this.getTupleData(parent, child, tablename,
+							this.schema.get(tablename));
+
+				}
 				parent.visited();
 				continue;
 			}
@@ -140,7 +168,7 @@ public class SchemaMatcher {
 			}
 		}
 	}
-	
+
 	public void match(ParsingObject root) {
 		this.matching(root);
 		this.builder.build(root);
