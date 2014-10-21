@@ -5,9 +5,9 @@ import java.util.Map;
 
 public class GenerateCSV {
 	public GenerateCSV() {
-		
+
 	}
-	
+
 	private void generateData(String tablename, SchemaMatcher matcher) {
 		ArrayList<ArrayList<String>> datalist = matcher.getTable().get(tablename);
 		StringBuffer   buffer   = new StringBuffer();
@@ -15,7 +15,8 @@ public class GenerateCSV {
 			ArrayList<String> line = datalist.get(i);
 			for(int j = 0; j < line.size(); j++) {
 				buffer.append(line.get(j));
-				buffer.append(",");
+				// buffer.append(",");
+				buffer.append("\t");
 			}
 			buffer.append("\n");
 		}
@@ -28,12 +29,13 @@ public class GenerateCSV {
 		StringBuffer   buffer   = new StringBuffer();
 		for(String column : columns.getFinalColumnSet()) {
 			buffer.append(column);
-			buffer.append(",");
+			// buffer.append(",");
+			buffer.append("\t");
 		}
 		System.out.println(buffer.toString());
 		System.out.println("---------------------------------------");
 	}
-	
+
 	public void generateCSV(SchemaMatcher matcher) {
 		Map<String, ArrayList<ArrayList<String>>> table = matcher.getTable();
 		for(String tablename : table.keySet()) {

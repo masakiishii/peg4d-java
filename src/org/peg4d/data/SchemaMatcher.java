@@ -54,15 +54,19 @@ public class SchemaMatcher {
 				for(int i = 1; i < parent.size(); i++) {
 					ParsingObject sibling = parent.get(i);
 					sibling.visited();
-					String linefeed = System.getProperty("line.separator");
+					// String linefeed = System.getProperty("line.separator");
 					if(sibling.size() == 0) {
 						String data = sibling.getText().toString();
-						if(data.length() > 128) {
-							sbuf.append("{too long text}");
-						}
-						else {
-							sbuf.append(data.replaceAll(linefeed, "").replaceAll("  ", "").replace(",", " "));
-						}
+						// if(data.length() > 128) {
+						// sbuf.append("{too long text}");
+						// }
+						// else {
+						// sbuf.append(data.replaceAll(linefeed,
+						// "").replaceAll("  ", "").replace(",", " "));
+						// }
+						// sbuf.append("\"");
+						sbuf.append(data.replace("\n", "\\n").replace("\t", "\\t"));
+						// sbuf.append("\"");
 					}
 					else {
 						if(sibling.getTag().toString().equals("List")) { // FIXME
@@ -76,9 +80,27 @@ public class SchemaMatcher {
 						}
 						else {
 							sibling.get(0).visited();
-							sbuf.append(sibling.get(0).getText().toString().replaceAll(linefeed, "").replaceAll("  ", "").replace(",", " "));
-							sbuf.append(":");
-							sbuf.append(this.rbuilder.getObjectId(sibling));
+							//sbuf.append(sibling.get(0).getText().toString().replaceAll(linefeed, "").replaceAll("  ", "").replace(",", " "));
+							String data = "";
+							if (sibling.get(0).size() == 0) {
+								data = sibling.get(0).getText().toString();
+								sbuf.append(data.replace("\n", "\\n").replace("\t", "\\t"));
+								sbuf.append(":");
+								sbuf.append(this.rbuilder.getObjectId(sibling));
+							} else {
+								for (int j = 0; j < sibling.size(); j++) {
+									ParsingObject grandchild = sibling.get(j);
+									if (grandchild.get(0).size() == 0) {
+										// Main.DebugPrint(grandchild.get(0).getText().toString());
+										sbuf.append(grandchild.get(0).getText().toString());
+										sbuf.append(":");
+										sbuf.append(this.rbuilder.getObjectId(grandchild));
+									}
+									if (j != sibling.size() - 1) {
+										sbuf.append("|");
+									}
+								}
+							}
 						}
 					}
 					if(i != parent.size() - 1) {
