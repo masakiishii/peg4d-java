@@ -44,7 +44,6 @@ public class RelationBuilder {
 		while(!queue.isEmpty()) {
 			ParsingObject node = queue.poll();
 			if (node.getTag().toString().equals("List")) {
-				System.out.println("List");
 				ParsingObject assumedtablenode = node.getParent().get(0);
 				String tablename = assumedtablenode.getText();
 				for (int i = 0; i < node.size(); i++) {
