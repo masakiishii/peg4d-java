@@ -61,7 +61,7 @@ public class RelationBuilder {
 					Main.DebugPrint("id: " + this.getObjectId(node.get(0)) + ", " + value);
 					SubNodeDataSet subnodeset = new SubNodeDataSet(this, node, value, this.getObjectId(assumedtablenode));
 					subnodeset.buildAssumedColumnSet();
-					if (subnodeset.getAssumedColumnSet().size() == 0) {
+					if (subnodeset.getAssumedColumnSet().size() > 0) {
 						this.allsubnodesetlist.add(subnodeset);
 					}
 				}
