@@ -1,14 +1,12 @@
 package org.peg4d.data;
 
-import org.peg4d.*;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.peg4d.Main;
 
 public class NominateSchema {
 	private RelationBuilder relationbuilder = null;
@@ -17,25 +15,25 @@ public class NominateSchema {
 		this.relationbuilder = relationbuilder;
 		this.schema = new LinkedHashMap<String, SubNodeDataSet>();
 	}
-	
+
 	private Set<String> calcIntersection(Set<String> setX, Set<String> setY) {
 		Set<String> intersection = new LinkedHashSet<String>(setX);
 		intersection.retainAll(setY);
 		return intersection;
 	}
-	
+
 	private Set<String> calcUnion(Set<String> setX, Set<String> setY) {
 		Set<String> union = new LinkedHashSet<String>(setX);
 		union.addAll(setY);
 		return union;
 	}
-	
+
 	private double calculatiingJaccard(Set<String> setX, Set<String> setY) {
 		Set<String> intersection  = this.calcIntersection(setX, setY);
 		Set<String> union         = this.calcUnion(setX, setY);
 		return (double)intersection.size() / union.size(); // jaccard coefficient
 	}
-	
+
 	private void nominateSchema(String tablename, SubNodeDataSet nodeX, SubNodeDataSet nodeY, double jaccardcoefficient) {
 		Set<String> setX = nodeX.getAssumedColumnSet();
 		Set<String> setY = nodeY.getAssumedColumnSet();
@@ -53,13 +51,14 @@ public class NominateSchema {
 			this.schema.put(tablename, nodeY);
 		}
 	}
-	
+
 	public Map<String, SubNodeDataSet> getSchema() {
 		return this.schema;
 	}
 
 	public void nominating() {
 		ArrayList<SubNodeDataSet> list = this.relationbuilder.getSubNodeDataSetList();
+		list.sort(new SubNodeDataSet());
 		for(int i = 0; i < list.size(); i++) {
 			for(int j = i + 1; j < list.size(); j++) {
 				Set<String> setX = list.get(i).getAssumedColumnSet();
