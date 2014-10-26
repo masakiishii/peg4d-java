@@ -47,11 +47,11 @@ public class RelationBuilder {
 				ParsingObject assumedtablenode = node.getParent().get(0);
 				String tablename = assumedtablenode.getText();
 				for (int i = 0; i < node.size(); i++) {
-					SubNodeDataSet subnodeset = new SubNodeDataSet(this,
-							node.get(i), tablename,
-							this.getObjectId(assumedtablenode));
+					SubNodeDataSet subnodeset = new SubNodeDataSet(this, node.get(i), tablename, this.getObjectId(assumedtablenode));
 					subnodeset.buildAssumedColumnSet();
-					this.allsubnodesetlist.add(subnodeset);
+					if (subnodeset.getAssumedColumnSet().size() > 0) {
+						this.allsubnodesetlist.add(subnodeset);
+					}
 				}
 				continue;
 			} else if (node.size() != 0 && node.get(0).size() == 0) {
@@ -59,10 +59,11 @@ public class RelationBuilder {
 				String value = assumedtablenode.getText();
 				if(!this.isNumber(value)) {
 					Main.DebugPrint("id: " + this.getObjectId(node.get(0)) + ", " + value);
-					SubNodeDataSet subnodeset
-					= new SubNodeDataSet(this, node, value, this.getObjectId(assumedtablenode));
+					SubNodeDataSet subnodeset = new SubNodeDataSet(this, node, value, this.getObjectId(assumedtablenode));
 					subnodeset.buildAssumedColumnSet();
-					this.allsubnodesetlist.add(subnodeset);
+					if (subnodeset.getAssumedColumnSet().size() == 0) {
+						this.allsubnodesetlist.add(subnodeset);
+					}
 				}
 			}
 			for(int index = 0; index < node.size(); index++) {

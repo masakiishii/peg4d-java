@@ -61,11 +61,8 @@ public class DefineSchema {
 		if (sortedschemalist.size() > 1) {
 			for(int i = 0; i < sortedschemalist.size(); i++) {
 				SubNodeDataSet subnodedatasetX = sortedschemalist.get(i);
-				ParsingObject  subnodeX = sortedschemalist.get(i).getSubNode();
 				for(int j = 0; j < sortedschemalist.size(); j++) {
 					SubNodeDataSet subnodedatasetY = sortedschemalist.get(j);
-					ParsingObject subnodeY = subnodedatasetY.getSubNode();
-					String column = subnodedatasetY.getAssumedTableName();
 					if(this.isSubTree(subnodedatasetX, subnodedatasetY)) {
 						sortedschemalist.remove(subnodedatasetY);
 						i = 0;
