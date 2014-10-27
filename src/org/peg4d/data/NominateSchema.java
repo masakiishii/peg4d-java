@@ -59,6 +59,7 @@ public class NominateSchema {
 		list.sort(new SubNodeDataSet());
 		ArrayList<SubNodeDataSet> removelist = new ArrayList<SubNodeDataSet>();
 		for(int i = 0; i < list.size(); i++) {
+			boolean flag = true;
 			for(int j = i + 1; j < list.size(); j++) {
 				Set<String> setX = list.get(i).getAssumedColumnSet();
 				Set<String> setY = list.get(j).getAssumedColumnSet();
@@ -70,13 +71,22 @@ public class NominateSchema {
 					double coefficient = this.calculatiingCoefficient(setX, setY);
 					if (coefficient > 0.5 && coefficient <= 1.0) {
 						this.nominateSchema(setXname, list.get(i), list.get(j), coefficient);
-						removelist.add(list.get(j));
-						list.remove(j);
-						j = j - 1;
+						if (flag) {
+							Point parentpoint = list.get(i).getPoint();
+							for (int k = list.size() - 1; k >= 0; k--) {
+								Point subnodepoint = list.get(k).getPoint();
+								if (parentpoint.getLtPos() < subnodepoint.getLtPos() && subnodepoint.getRtPos() < parentpoint.getRtPos()) {
+									list.remove(k);
+								}
+							}
+							flag = false;
+						}
 					}
+					removelist.add(list.get(j));
+					list.remove(j);
+					j = j - 1;
 				}
 			}
-			// System.out.println(removelist.size());
 			for (int j = 0; j < removelist.size(); j++) {
 				Point parentpoint = removelist.get(j).getPoint();
 				for (int k = list.size() - 1; k >= 0; k--) {
@@ -88,5 +98,11 @@ public class NominateSchema {
 			}
 			removelist.clear();
 		}
+		// for (String key : this.schema.keySet()) {
+		// System.out.println("tablename: " + key);
+		// System.out.println("column set: " +
+		// this.schema.get(key).getAssumedColumnSet());
+		// System.out.println("---------------------------------------------------------");
+		// }
 	}
 }
