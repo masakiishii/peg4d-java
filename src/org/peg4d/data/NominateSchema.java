@@ -94,5 +94,9 @@ public class NominateSchema {
 			}
 			removelist.clear();
 		}
+		for (String tablename : this.schema.keySet()) {
+			System.out.println("tablename: " + tablename);
+			System.out.println("set:       " + this.schema.get(tablename).getAssumedColumnSet());
+		}
 	}
 }

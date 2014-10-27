@@ -22,14 +22,24 @@ public class DefineSchema {
 		return this.schematypechecker.check(this.root, subnodedatasetX, subnodedatasetY);
 	}
 
-	private ArrayList<SubNodeDataSet> sortNominatedSchemaTable() {
+	// private ArrayList<SubNodeDataSet> sortNominatedSchemaTable() {
+	// Map<String, SubNodeDataSet> schema = this.nominatedschema.getSchema();
+	// ArrayList<SubNodeDataSet> list = new ArrayList<SubNodeDataSet>();
+	// for(String tablename : schema.keySet()) {
+	// SubNodeDataSet subnodedataset = schema.get(tablename);
+	// list.add(subnodedataset);
+	// }
+	// list.sort(new SubNodeDataSet());
+	// return list;
+	// }
+
+	private ArrayList<SubNodeDataSet> NominatedSchemaTable() {
 		Map<String, SubNodeDataSet> schema = this.nominatedschema.getSchema();
 		ArrayList<SubNodeDataSet> list = new ArrayList<SubNodeDataSet>();
 		for(String tablename : schema.keySet()) {
 			SubNodeDataSet subnodedataset = schema.get(tablename);
 			list.add(subnodedataset);
 		}
-		list.sort(new SubNodeDataSet());
 		return list;
 	}
 
@@ -56,21 +66,24 @@ public class DefineSchema {
 	}
 
 	private Map<String, SubNodeDataSet> defineSchema() {
-		ArrayList<SubNodeDataSet> sortedschemalist = this.sortNominatedSchemaTable();
-		if (sortedschemalist.size() > 1) {
-			for(int i = 0; i < sortedschemalist.size(); i++) {
-				SubNodeDataSet subnodedatasetX = sortedschemalist.get(i);
-				for(int j = 0; j < sortedschemalist.size(); j++) {
-					SubNodeDataSet subnodedatasetY = sortedschemalist.get(j);
-					if(this.isSubTree(subnodedatasetX, subnodedatasetY)) {
-						sortedschemalist.remove(subnodedatasetY);
-						i = 0;
-						j = 0;
-					}
-				}
-			}
-		}
-		return this.buildMap(sortedschemalist);
+		// ArrayList<SubNodeDataSet> sortedschemalist =
+		// this.sortNominatedSchemaTable();
+		// if (sortedschemalist.size() > 1) {
+		// for(int i = 0; i < sortedschemalist.size(); i++) {
+		// SubNodeDataSet subnodedatasetX = sortedschemalist.get(i);
+		// for(int j = 0; j < sortedschemalist.size(); j++) {
+		// SubNodeDataSet subnodedatasetY = sortedschemalist.get(j);
+		// if(this.isSubTree(subnodedatasetX, subnodedatasetY)) {
+		// sortedschemalist.remove(subnodedatasetY);
+		// i = 0;
+		// j = 0;
+		// }
+		// }
+		// }
+		// }
+		// return this.buildMap(sortedschemalist);
+		ArrayList<SubNodeDataSet> schemalist = this.NominatedSchemaTable();
+		return this.buildMap(schemalist);
 	}
 
 	public Map<String, SubNodeDataSet> define() {

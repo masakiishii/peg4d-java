@@ -16,7 +16,6 @@ public class SchemaMatcher {
 	private RootTableBuilder                          builder   = null;
 	public SchemaMatcher(RelationBuilder rbuilder, Map<String, SubNodeDataSet> schema) {
 		this.rbuilder = rbuilder;
-		this.schema = new HashMap<String, SubNodeDataSet>();
 		this.schema = schema;
 		this.initTable();
 		this.generator = new GenerateCSV();
