@@ -49,8 +49,8 @@ public class RelationBuilder {
 				for (int i = 0; i < node.size(); i++) {
 					SubNodeDataSet subnodeset = new SubNodeDataSet(this, node.get(i), tablename, this.getObjectId(assumedtablenode));
 					subnodeset.buildAssumedColumnSet();
-					// if (subnodeset.getAssumedColumnSet().size() > 1) {
-					if (subnodeset.getAssumedColumnSet().size() > 0) {
+					if (subnodeset.getAssumedColumnSet().size() > 1) {
+						// if (subnodeset.getAssumedColumnSet().size() > 0) {
 						this.allsubnodesetlist.add(subnodeset);
 					}
 				}
@@ -63,8 +63,8 @@ public class RelationBuilder {
 					// ", " + value);
 					SubNodeDataSet subnodeset = new SubNodeDataSet(this, node, value, this.getObjectId(assumedtablenode));
 					subnodeset.buildAssumedColumnSet();
-					// if (subnodeset.getAssumedColumnSet().size() > 1) {
-					if (subnodeset.getAssumedColumnSet().size() > 0) {
+					if (subnodeset.getAssumedColumnSet().size() > 1) {
+						// if (subnodeset.getAssumedColumnSet().size() > 0) {
 						this.allsubnodesetlist.add(subnodeset);
 					}
 				}
