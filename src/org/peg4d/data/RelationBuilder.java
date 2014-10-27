@@ -49,7 +49,8 @@ public class RelationBuilder {
 				for (int i = 0; i < node.size(); i++) {
 					SubNodeDataSet subnodeset = new SubNodeDataSet(this, node.get(i), tablename, this.getObjectId(assumedtablenode));
 					subnodeset.buildAssumedColumnSet();
-					if (subnodeset.getAssumedColumnSet().size() > 1) {
+					// if (subnodeset.getAssumedColumnSet().size() > 1) {
+					if (subnodeset.getAssumedColumnSet().size() > 0) {
 						this.allsubnodesetlist.add(subnodeset);
 					}
 				}
@@ -62,7 +63,8 @@ public class RelationBuilder {
 					// ", " + value);
 					SubNodeDataSet subnodeset = new SubNodeDataSet(this, node, value, this.getObjectId(assumedtablenode));
 					subnodeset.buildAssumedColumnSet();
-					if (subnodeset.getAssumedColumnSet().size() > 1) {
+					// if (subnodeset.getAssumedColumnSet().size() > 1) {
+					if (subnodeset.getAssumedColumnSet().size() > 0) {
 						this.allsubnodesetlist.add(subnodeset);
 					}
 				}
@@ -77,12 +79,12 @@ public class RelationBuilder {
 		for(int i = 0; i < this.allsubnodesetlist.size(); i++) {
 			SubNodeDataSet subnodedata = this.allsubnodesetlist.get(i);
 			Set<String> subnodeset     = subnodedata.getAssumedColumnSet();
-			Main.DebugPrint("tableName: " + subnodedata.getAssumedTableName());
-			Main.DebugPrint("-----------------------------------------------");
+			System.out.println("tableName: " + subnodedata.getAssumedTableName());
+			System.out.println("-----------------------------------------------");
 			for(String element : subnodeset) {
-				Main.DebugPrint(element);
+				System.out.println(element);
 			}
-			Main.DebugPrint("\n");
+			System.out.println("\n");
 		}
 	}
 

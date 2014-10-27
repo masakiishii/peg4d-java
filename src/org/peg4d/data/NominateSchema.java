@@ -42,11 +42,9 @@ public class NominateSchema {
 			this.schema.get(tablename).getAssumedColumnSet().addAll(setY);
 			return;
 		}
-		if(setX.size() > setY.size()) {
-			this.schema.put(tablename, nodeX);
-		}
 		else {
-			this.schema.put(tablename, nodeY);
+			nodeX.getAssumedColumnSet().addAll(setY);
+			this.schema.put(tablename, nodeX);
 		}
 	}
 
@@ -66,8 +64,6 @@ public class NominateSchema {
 				String setXname  = list.get(i).getAssumedTableName();
 				String setYname  = list.get(j).getAssumedTableName();
 				if (setXname.equals(setYname) && setX.size() > 0 && setY.size() > 0) {
-					// Main.DebugPrint(setX);
-					// Main.DebugPrint(setY);
 					double coefficient = this.calculatiingCoefficient(setX, setY);
 					if (coefficient > 0.5 && coefficient <= 1.0) {
 						this.nominateSchema(setXname, list.get(i), list.get(j), coefficient);
@@ -98,11 +94,5 @@ public class NominateSchema {
 			}
 			removelist.clear();
 		}
-		// for (String key : this.schema.keySet()) {
-		// System.out.println("tablename: " + key);
-		// System.out.println("column set: " +
-		// this.schema.get(key).getAssumedColumnSet());
-		// System.out.println("---------------------------------------------------------");
-		// }
 	}
 }
