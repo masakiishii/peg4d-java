@@ -16,7 +16,7 @@ public class SubNodeDataSet implements Comparator<SubNodeDataSet> {
 	private Set<String>     assumedColumnSet   = null;
 	private Set<String>     finalColumnSet     = null;
 	private int             assumedTableNodeId = -1;
-	private double          jaccardCoefficient = -1;
+	private double Coefficient = -1;
 
 	public SubNodeDataSet(RelationBuilder relationbuilder,
 			ParsingObject subNode, String assumedTableName, int assumedTableId) {
@@ -72,11 +72,13 @@ public class SubNodeDataSet implements Comparator<SubNodeDataSet> {
 	public Set<String> getAssumedColumnSet() {
 		return this.assumedColumnSet;
 	}
-	public void setJaccardCoefficient(double jaccardcoefficient) {
-		this.jaccardCoefficient = jaccardcoefficient;
+
+	public void setCoefficient(double coefficient) {
+		this.Coefficient = coefficient;
 	}
-	public double getJaccardCoefficient() {
-		return this.jaccardCoefficient;
+
+	public double getCoefficient() {
+		return this.Coefficient;
 	}
 	public void setFinalColumnSet(String headcolumn) {
 		this.finalColumnSet.add(headcolumn);

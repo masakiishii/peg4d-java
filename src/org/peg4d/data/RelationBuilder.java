@@ -58,7 +58,8 @@ public class RelationBuilder {
 				ParsingObject assumedtablenode = node.get(0);
 				String value = assumedtablenode.getText();
 				if(!this.isNumber(value)) {
-					Main.DebugPrint("id: " + this.getObjectId(node.get(0)) + ", " + value);
+					// Main.DebugPrint("id: " + this.getObjectId(node.get(0)) +
+					// ", " + value);
 					SubNodeDataSet subnodeset = new SubNodeDataSet(this, node, value, this.getObjectId(assumedtablenode));
 					subnodeset.buildAssumedColumnSet();
 					if (subnodeset.getAssumedColumnSet().size() > 0) {
@@ -89,7 +90,7 @@ public class RelationBuilder {
 		DomainBuilder domainbuilder = new DomainBuilder();
 		domainbuilder.build(this.root);
 		this.recollectAllSubNode(this.root);
-		this.showSubNodeSet();
+		// this.showSubNodeSet();
 		NominateSchema preschema = new NominateSchema(this);
 		preschema.nominating();
 		DefineSchema defineschema = new DefineSchema(preschema, this.root);

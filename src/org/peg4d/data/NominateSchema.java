@@ -6,8 +6,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.peg4d.Main;
-
 public class NominateSchema {
 	private RelationBuilder relationbuilder = null;
 	private Map<String, SubNodeDataSet> schema = null;
@@ -28,17 +26,17 @@ public class NominateSchema {
 		return union;
 	}
 
-	private double calculatiingJaccard(Set<String> setX, Set<String> setY) {
+	private double calculatiingCoefficient(Set<String> setX, Set<String> setY) {
 		Set<String> intersection  = this.calcIntersection(setX, setY);
 		Set<String> union         = this.calcUnion(setX, setY);
-		return (double)intersection.size() / union.size(); // jaccard coefficient
+		return (double) intersection.size() / union.size(); // coefficient
 	}
 
-	private void nominateSchema(String tablename, SubNodeDataSet nodeX, SubNodeDataSet nodeY, double jaccardcoefficient) {
+	private void nominateSchema(String tablename, SubNodeDataSet nodeX, SubNodeDataSet nodeY, double coefficient) {
 		Set<String> setX = nodeX.getAssumedColumnSet();
 		Set<String> setY = nodeY.getAssumedColumnSet();
-		nodeX.setJaccardCoefficient(jaccardcoefficient);
-		nodeY.setJaccardCoefficient(jaccardcoefficient);
+		nodeX.setCoefficient(coefficient);
+		nodeY.setCoefficient(coefficient);
 		if(this.schema.containsKey(tablename)) {
 			this.schema.get(tablename).getAssumedColumnSet().addAll(setX);
 			this.schema.get(tablename).getAssumedColumnSet().addAll(setY);
@@ -58,7 +56,8 @@ public class NominateSchema {
 
 	public void nominating() {
 		ArrayList<SubNodeDataSet> list = this.relationbuilder.getSubNodeDataSetList();
-		// list.sort(new SubNodeDataSet());
+		list.sort(new SubNodeDataSet());
+		ArrayList<SubNodeDataSet> removelist = new ArrayList<SubNodeDataSet>();
 		for(int i = 0; i < list.size(); i++) {
 			for(int j = i + 1; j < list.size(); j++) {
 				Set<String> setX = list.get(i).getAssumedColumnSet();
@@ -66,14 +65,28 @@ public class NominateSchema {
 				String setXname  = list.get(i).getAssumedTableName();
 				String setYname  = list.get(j).getAssumedTableName();
 				if (setXname.equals(setYname) && setX.size() > 0 && setY.size() > 0) {
-					Main.DebugPrint(setX);
-					Main.DebugPrint(setY);
-					double jaccardcoefficient = this.calculatiingJaccard(setX, setY);
-					if(jaccardcoefficient > 0.5 && jaccardcoefficient <= 1.0) {
-						this.nominateSchema(setXname, list.get(i), list.get(j), jaccardcoefficient);
+					// Main.DebugPrint(setX);
+					// Main.DebugPrint(setY);
+					double coefficient = this.calculatiingCoefficient(setX, setY);
+					if (coefficient > 0.5 && coefficient <= 1.0) {
+						this.nominateSchema(setXname, list.get(i), list.get(j), coefficient);
+						removelist.add(list.get(j));
+						list.remove(j);
+						j = j - 1;
 					}
 				}
 			}
+			// System.out.println(removelist.size());
+			for (int j = 0; j < removelist.size(); j++) {
+				Point parentpoint = removelist.get(j).getPoint();
+				for (int k = list.size() - 1; k >= 0; k--) {
+					Point subnodepoint = list.get(k).getPoint();
+					if (parentpoint.getLtPos() < subnodepoint.getLtPos() && subnodepoint.getRtPos() < parentpoint.getRtPos()) {
+						list.remove(k);
+					}
+				}
+			}
+			removelist.clear();
 		}
 	}
 }

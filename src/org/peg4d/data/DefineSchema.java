@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.peg4d.Main;
 import org.peg4d.ParsingObject;
 
 public class DefineSchema {
@@ -42,16 +41,16 @@ public class DefineSchema {
 			map.put(tablename, set);
 		}
 		for(String key : map.keySet()) {
-			Main.DebugPrint("tablename: " + key);
-			Main.DebugPrint("--------------------------------------------------");
+			// Main.DebugPrint("tablename: " + key);
+			// Main.DebugPrint("--------------------------------------------------");
 			SubNodeDataSet subnodeset = map.get(key);
 			Set<String> preset = subnodeset.getAssumedColumnSet();
 			subnodeset.setFinalColumnSet("OBJECTID");
 			subnodeset.setFinalColumnSet(preset);
 			Set<String> postset = subnodeset.getFinalColumnSet();
-			Main.DebugPrint("columns Set: " + postset);
-			Main.DebugPrint("");
-			Main.DebugPrint("");
+			// Main.DebugPrint("columns Set: " + postset);
+			// Main.DebugPrint("");
+			// Main.DebugPrint("");
 		}
 		return map;
 	}

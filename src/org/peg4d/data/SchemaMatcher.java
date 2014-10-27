@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-import org.peg4d.Main;
 import org.peg4d.ParsingObject;
 
 public class SchemaMatcher {
@@ -115,13 +114,13 @@ public class SchemaMatcher {
 			}
 		}
 		if(sbuf.length() > 0) {
-			Main.DebugPrint("column: " + column);
-			Main.DebugPrint("data:   " + sbuf.toString());
+			// Main.DebugPrint("column: " + column);
+			// Main.DebugPrint("data:   " + sbuf.toString());
 			return "[" + sbuf.toString() + "]";
 		}
 		else {
-			Main.DebugPrint("column: " + column);
-			Main.DebugPrint("data:   " + null);
+			// Main.DebugPrint("column: " + column);
+			// Main.DebugPrint("data:   " + null);
 			return null;
 		}
 	}
@@ -135,13 +134,13 @@ public class SchemaMatcher {
 				continue;
 			}
 			else {
-				Main.DebugPrint("start [" + column + "] matching・・・・・");
-				Main.DebugPrint("=======================================");
+				// Main.DebugPrint("start [" + column + "] matching・・・・・");
+				// Main.DebugPrint("=======================================");
 				String data = this.getColumnData(subnode, tablenode, column);
 				columndata.add(data);
-				Main.DebugPrint("---------------------------------------");
-				Main.DebugPrint("");
-				Main.DebugPrint("");
+				// Main.DebugPrint("---------------------------------------");
+				// Main.DebugPrint("");
+				// Main.DebugPrint("");
 			}
 		}
 		tabledata.add(columndata);
