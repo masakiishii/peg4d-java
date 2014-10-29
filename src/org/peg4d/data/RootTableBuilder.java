@@ -4,14 +4,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.peg4d.ParsingObject;
-
 public class RootTableBuilder {
-	private RelationBuilder rbuilder   = null;
 	private ArrayList<String> schema   = null;
 	private Map<String, String> table = null;
 	public RootTableBuilder(RelationBuilder rbuilder) {
-		this.rbuilder  = rbuilder;
 		this.schema    = new ArrayList<String>();
 		this.table     = new LinkedHashMap<String, String>();
 		this.initSchema();
@@ -23,16 +19,16 @@ public class RootTableBuilder {
 		this.schema.add("VALUE");
 	}
 
-	private void setTableData(ParsingObject node) {
-		ParsingObject parent = node.getParent();
-		String key = String.valueOf(this.rbuilder.getObjectId(parent));
+	private void setTableData(LappingObject node) {
+		LappingObject parent = node.getParent();
+		String key = String.valueOf(parent.getObjectId());
 		String column = node.getText().toString();
 		StringBuffer sbuf = new StringBuffer();
 		sbuf.append(column);
 		sbuf.append("\t");
 		sbuf.append("[");
 		for(int i = 1; i < parent.size(); i++) {
-			ParsingObject sibling = parent.get(i);
+			LappingObject sibling = parent.get(i);
 			if(sibling.size() == 0) {
 				sbuf.append(sibling.getText().toString());
 				sibling.visited();
@@ -46,7 +42,7 @@ public class RootTableBuilder {
 					else {
 						sbuf.append(sibling.get(j).getTag().toString());
 						sbuf.append(":");
-						sbuf.append(this.rbuilder.getObjectId(sibling.get(j)));
+						sbuf.append(sibling.get(j).getObjectId());
 					}
 					if(j != sibling.size() - 1) {
 						sbuf.append("|");
@@ -54,7 +50,7 @@ public class RootTableBuilder {
 				}
 			}
 			else {
-				ParsingObject grandchild = sibling.get(0);
+				LappingObject grandchild = sibling.get(0);
 				if(grandchild.size() == 0) {
 					sbuf.append(grandchild.getText().toString());
 				}
@@ -62,7 +58,7 @@ public class RootTableBuilder {
 					sbuf.append(sibling.getTag().toString());
 				}
 				sbuf.append(":");
-				sbuf.append(this.rbuilder.getObjectId(sibling));
+				sbuf.append(sibling.getObjectId());
 			}
 			if(i != parent.size() - 1) {
 				sbuf.append("|");
@@ -72,7 +68,7 @@ public class RootTableBuilder {
 		this.table.put(key, sbuf.toString());
 	}
 
-	private void buildRootTable(ParsingObject node) {
+	private void buildRootTable(LappingObject node) {
 		if(node == null) {
 			return;
 		}
@@ -94,7 +90,7 @@ public class RootTableBuilder {
 		System.out.println();
 	}
 
-	public void build(ParsingObject node) {
+	public void build(LappingObject node) {
 		this.generateRootColumns();
 		this.buildRootTable(node);
 		for(String key : this.table.keySet()) {

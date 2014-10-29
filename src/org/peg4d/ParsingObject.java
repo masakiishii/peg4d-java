@@ -12,9 +12,6 @@ public class ParsingObject extends AbstractList<ParsingObject> {
 	private Object           value  = null;
 	ParsingObject            parent = null;
 	private ParsingObject    AST[]  = null;
-	private int              lpos    = -1;
-	private int              rpos    = -1;
-	private boolean          visited = false;
 
 	public ParsingObject(ParsingTag tag, ParsingSource source, long pospeg) {
 		this.oid = idCount++;
@@ -38,34 +35,7 @@ public class ParsingObject extends AbstractList<ParsingObject> {
 //		System.out.println("gc " + this.getSourcePosition());
 //	}
 	
-	public int getObjectId() {
-		return this.oid;
-	}
-	
-	public void setLpos(int lpos) {
-		this.lpos = lpos;
-	}
 
-	public void setRpos(int rpos) {
-		this.rpos = rpos;
-	}
-	
-	public int getLpos() {
-		return this.lpos;
-	}
-
-	public int getRpos() {
-		return this.rpos;
-	}
-	
-	public void visited() {
-		this.visited = true;
-	}
-	
-	public boolean visitedNode() {
-		return this.visited;
-	}
-	
 	public final ParsingObject getParent() {
 		return this.parent;
 	}
@@ -128,9 +98,9 @@ public class ParsingObject extends AbstractList<ParsingObject> {
 	// AST[]
 	
 	public ParsingExpression getSourceExpression() {
-		short pegid = ParsingUtils.getpegid(pospeg);
-		if(pegid > 0 && source.peg != null) {
-			return source.peg.getDefinedExpression(pegid);
+		short pegid = ParsingUtils.getpegid(this.pospeg);
+		if(pegid > 0 && this.source.peg != null) {
+			return this.source.peg.getDefinedExpression(pegid);
 		}
 		return null;
 	}
@@ -159,7 +129,7 @@ public class ParsingObject extends AbstractList<ParsingObject> {
 
 	@Override
 	public final int size() {
-		checkLazyAST();
+		this.checkLazyAST();
 		if(this.AST == null) {
 			return 0;
 		}
@@ -168,7 +138,7 @@ public class ParsingObject extends AbstractList<ParsingObject> {
 
 	@Override
 	public final ParsingObject get(int index) {
-		checkLazyAST();
+		this.checkLazyAST();
 		return this.AST[index];
 	}
 

@@ -6,8 +6,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-import org.peg4d.ParsingObject;
-
 public class SchemaMatcher {
 	private RelationBuilder                           rbuilder  = null;
 	private Map<String, SubNodeDataSet>               schema    = null;
@@ -36,21 +34,21 @@ public class SchemaMatcher {
 		return this.schema;
 	}
 
-	private String getColumnData(ParsingObject subnode,
-			ParsingObject tablenode, String column) {
+	private String getColumnData(LappingObject subnode,
+			LappingObject tablenode, String column) {
 		if(subnode == null) {
 			return null;
 		}
-		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
+		Queue<LappingObject> queue = new LinkedList<LappingObject>();
 		queue.offer(subnode);
 		StringBuffer sbuf = new StringBuffer();
 		while(!queue.isEmpty()) {
-			ParsingObject node = queue.poll();
+			LappingObject node = queue.poll();
 			if(node.getText().toString().equals(column)) {
 				node.visited();
-				ParsingObject parent = node.getParent();
+				LappingObject parent = node.getParent();
 				for(int i = 1; i < parent.size(); i++) {
-					ParsingObject sibling = parent.get(i);
+					LappingObject sibling = parent.get(i);
 					sibling.visited();
 					// String linefeed = System.getProperty("line.separator");
 					if(sibling.size() == 0) {
@@ -84,15 +82,15 @@ public class SchemaMatcher {
 								data = sibling.get(0).getText().toString();
 								sbuf.append(data.replace("\n", "\\n").replace("\t", "\\t"));
 								sbuf.append(":");
-								sbuf.append(this.rbuilder.getObjectId(sibling));
+								sbuf.append(sibling.getObjectId());
 							} else {
 								for (int j = 0; j < sibling.size(); j++) {
-									ParsingObject grandchild = sibling.get(j);
+									LappingObject grandchild = sibling.get(j);
 									if (grandchild.get(0).size() == 0) {
 										// Main.DebugPrint(grandchild.get(0).getText().toString());
 										sbuf.append(grandchild.get(0).getText().toString());
 										sbuf.append(":");
-										sbuf.append(this.rbuilder.getObjectId(grandchild));
+										sbuf.append(grandchild.getObjectId());
 									}
 									if (j != sibling.size() - 1) {
 										sbuf.append("|");
@@ -124,12 +122,13 @@ public class SchemaMatcher {
 		}
 	}
 
-	private void getTupleData(ParsingObject subnode, ParsingObject tablenode, String tablename, SubNodeDataSet columns) {
+	private void getTupleData(LappingObject subnode, LappingObject tablenode,
+			String tablename, SubNodeDataSet columns) {
 		ArrayList<ArrayList<String>> tabledata = this.table.get(tablename);
 		ArrayList<String> columndata = new ArrayList<String>();
 		for(String column : columns.getFinalColumnSet()) {
 			if(column.equals("OBJECTID")) {
-				columndata.add(String.valueOf(this.rbuilder.getObjectId(subnode)));
+				columndata.add(String.valueOf(subnode.getObjectId()));
 				continue;
 			}
 			else {
@@ -145,9 +144,9 @@ public class SchemaMatcher {
 		tabledata.add(columndata);
 	}
 
-	private void getTupleListData(ParsingObject subnode,
-			ParsingObject tablenode, String tablename, SubNodeDataSet columns) {
-		ParsingObject listnode = subnode.get(1);
+	private void getTupleListData(LappingObject subnode,
+			LappingObject tablenode, String tablename, SubNodeDataSet columns) {
+		LappingObject listnode = subnode.get(1);
 		for (int i = 0; i < listnode.size(); i++) {
 			this.getTupleData(listnode.get(i), tablenode, tablename, columns);
 		}
@@ -157,18 +156,18 @@ public class SchemaMatcher {
 		return this.schema.containsKey(value) ? true : false;
 	}
 
-	private void matching(ParsingObject root) {
+	private void matching(LappingObject root) {
 		if(root == null) {
 			return;
 		}
-		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
+		Queue<LappingObject> queue = new LinkedList<LappingObject>();
 		queue.offer(root);
 		while(!queue.isEmpty()) {
-			ParsingObject parent = queue.poll();
+			LappingObject parent = queue.poll();
 			if(parent.size() == 0) {
 				continue;
 			}
-			ParsingObject child  = parent.get(0);
+			LappingObject child = parent.get(0);
 			if(child.size() == 0 && this.isTableName(child.getText().toString())) {
 				child.visited();
 				String tablename = child.getText().toString();
@@ -189,7 +188,7 @@ public class SchemaMatcher {
 		}
 	}
 
-	public void match(ParsingObject root) {
+	public void match(LappingObject root) {
 		this.matching(root);
 		this.builder.build(root);
 		this.generator.generateCSV(this);

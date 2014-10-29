@@ -68,10 +68,13 @@ public class NominateSchema {
 					if (coefficient > 0.5 && coefficient <= 1.0) {
 						this.nominateSchema(setXname, list.get(i), list.get(j), coefficient);
 						if (flag) {
-							Point parentpoint = list.get(i).getPoint();
+							Coordinate parentpoint = list.get(i).getSubNode().getCoord();
 							for (int k = list.size() - 1; k >= 0; k--) {
-								Point subnodepoint = list.get(k).getPoint();
-								if (parentpoint.getLtPos() < subnodepoint.getLtPos() && subnodepoint.getRtPos() < parentpoint.getRtPos()) {
+								Coordinate subnodepoint = list.get(k).getSubNode().getCoord();
+								if (parentpoint.getLtpos() < subnodepoint
+										.getLtpos()
+										&& subnodepoint.getRtpos() < parentpoint
+										.getRtpos()) {
 									list.remove(k);
 								}
 							}
@@ -84,19 +87,21 @@ public class NominateSchema {
 				}
 			}
 			for (int j = 0; j < removelist.size(); j++) {
-				Point parentpoint = removelist.get(j).getPoint();
+				Coordinate parentpoint = removelist.get(j).getCoord();
 				for (int k = list.size() - 1; k >= 0; k--) {
-					Point subnodepoint = list.get(k).getPoint();
-					if (parentpoint.getLtPos() < subnodepoint.getLtPos() && subnodepoint.getRtPos() < parentpoint.getRtPos()) {
+					Coordinate subnodepoint = list.get(k).getCoord();
+					if (parentpoint.getLtpos() < subnodepoint.getLtpos()
+							&& subnodepoint.getRtpos() < parentpoint.getRtpos()) {
 						list.remove(k);
 					}
 				}
 			}
 			removelist.clear();
 		}
-		for (String tablename : this.schema.keySet()) {
-			System.out.println("tablename: " + tablename);
-			System.out.println("set:       " + this.schema.get(tablename).getAssumedColumnSet());
-		}
+		// for (String tablename : this.schema.keySet()) {
+		// System.out.println("tablename: " + tablename);
+		// System.out.println("set:       " +
+		// this.schema.get(tablename).getAssumedColumnSet());
+		// }
 	}
 }

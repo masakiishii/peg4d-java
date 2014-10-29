@@ -5,14 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.peg4d.ParsingObject;
-
 public class DefineSchema {
 	private NominateSchema nominatedschema      = null;
 	private SchemaTypeChecker schematypechecker = null;
-	private ParsingObject root                  = null;
+	private LappingObject root = null;
 
-	public DefineSchema(NominateSchema nominatedschema, ParsingObject root) {
+	public DefineSchema(NominateSchema nominatedschema, LappingObject root) {
 		this.nominatedschema   = nominatedschema;
 		this.schematypechecker = new SchemaTypeChecker();
 		this.root              = root;

@@ -6,12 +6,10 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
-import org.peg4d.ParsingObject;
-
 public class SubNodeDataSet implements Comparator<SubNodeDataSet> {
 	private RelationBuilder relationbuilder    = null;
-	private ParsingObject   subNode            = null;
-	private Point           subNodePoint       = null;
+	private LappingObject subNode = null;
+	// private Coordinate subNodeCoord = null;
 	private String          assumedTableName   = null;
 	private Set<String>     assumedColumnSet   = null;
 	private Set<String>     finalColumnSet     = null;
@@ -19,10 +17,11 @@ public class SubNodeDataSet implements Comparator<SubNodeDataSet> {
 	private double Coefficient = -1;
 
 	public SubNodeDataSet(RelationBuilder relationbuilder,
-			ParsingObject subNode, String assumedTableName, int assumedTableId) {
+			LappingObject subNode, String assumedTableName, int assumedTableId) {
 		this.relationbuilder  = relationbuilder;
 		this.subNode          = subNode;
-		this.subNodePoint     = new Point(subNode.getLpos(), subNode.getRpos());
+		// this.subNodeCoord = new Coordinate(subNode.getLpos(),
+		// subNode.getRpos());
 		this.assumedTableName = assumedTableName;
 		this.assumedColumnSet = new LinkedHashSet<String>();
 		this.finalColumnSet   = new LinkedHashSet<String>();
@@ -34,8 +33,8 @@ public class SubNodeDataSet implements Comparator<SubNodeDataSet> {
 
 	@Override
 	public int compare(SubNodeDataSet o1, SubNodeDataSet o2) {
-		Point p1 = o1.getPoint();
-		Point p2 = o2.getPoint();
+		Coordinate p1 = o1.subNode.getCoord();
+		Coordinate p2 = o2.subNode.getCoord();
 		return p2.getRange() - p1.getRange();
 	}
 
@@ -43,14 +42,14 @@ public class SubNodeDataSet implements Comparator<SubNodeDataSet> {
 		if(this.subNode == null) {
 			return;
 		}
-		Queue<ParsingObject> queue = new LinkedList<ParsingObject>();
+		Queue<LappingObject> queue = new LinkedList<LappingObject>();
 		queue.offer(this.subNode);
 		while(!queue.isEmpty()) {
-			ParsingObject node = queue.poll();
+			LappingObject node = queue.poll();
 			if(node.size() != 0 && node.get(0).size() == 0
-					&& this.relationbuilder.getObjectId(node.get(0)) != this.assumedTableNodeId) {
+					&& node.get(0).getObjectId() != this.assumedTableNodeId) {
 				String value = node.get(0).getText();
-				if(!this.relationbuilder.isNumber(value)) {
+				if (!RelationBuilder.isNumber(value)) {
 					this.assumedColumnSet.add(value);
 				}
 			}
@@ -60,10 +59,11 @@ public class SubNodeDataSet implements Comparator<SubNodeDataSet> {
 		}
 	}
 
-	public Point getPoint() {
-		return this.subNodePoint;
-	}
-	public ParsingObject getSubNode() {
+	// public Coordinate getCoord() {
+	// return this.subNodeCoord;
+	// }
+
+	public LappingObject getSubNode() {
 		return this.subNode;
 	}
 	public String getAssumedTableName() {
