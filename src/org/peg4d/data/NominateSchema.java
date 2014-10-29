@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class NominateSchema {
-	private RelationBuilder relationbuilder = null;
+	private RelationBuilder relationbuilder    = null;
 	private Map<String, SubNodeDataSet> schema = null;
 	public NominateSchema(RelationBuilder relationbuilder) {
 		this.relationbuilder = relationbuilder;
@@ -87,9 +87,9 @@ public class NominateSchema {
 				}
 			}
 			for (int j = 0; j < removelist.size(); j++) {
-				Coordinate parentpoint = removelist.get(j).getCoord();
+				Coordinate parentpoint = removelist.get(j).getSubNode().getCoord();
 				for (int k = list.size() - 1; k >= 0; k--) {
-					Coordinate subnodepoint = list.get(k).getCoord();
+					Coordinate subnodepoint = list.get(k).getSubNode().getCoord();
 					if (parentpoint.getLtpos() < subnodepoint.getLtpos()
 							&& subnodepoint.getRtpos() < parentpoint.getRtpos()) {
 						list.remove(k);

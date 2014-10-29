@@ -8,11 +8,11 @@ import org.peg4d.Main;
 import org.peg4d.ParsingObject;
 
 public class RelationBuilder {
-	private ParsingObject root   = null;
-	private int segmentidpos = 0;
+	private ParsingObject root         = null;
+	private int           segmentidpos = 0;
 	private ArrayList<SubNodeDataSet> allsubnodesetlist = null;
 	public RelationBuilder(ParsingObject root) {
-		this.root   = root;
+		this.root = root;
 		this.segmentidpos++;
 		this.allsubnodesetlist = new ArrayList<SubNodeDataSet>();
 	}

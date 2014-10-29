@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class DefineSchema {
-	private NominateSchema nominatedschema      = null;
+	private NominateSchema    nominatedschema   = null;
 	private SchemaTypeChecker schematypechecker = null;
-	private LappingObject root = null;
+	private LappingObject     root              = null;
 
 	public DefineSchema(NominateSchema nominatedschema, LappingObject root) {
 		this.nominatedschema   = nominatedschema;

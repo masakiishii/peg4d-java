@@ -40,8 +40,8 @@ public class SchemaTypeChecker {
 	}
 
 	public boolean inList(ArrayList<int[]> list, SubNodeDataSet subnodedatasetY) {
-		int lpos = subnodedatasetY.getCoord().getLtpos();
-		int rpos = subnodedatasetY.getCoord().getRtpos();
+		int lpos = subnodedatasetY.getSubNode().getCoord().getLtpos();
+		int rpos = subnodedatasetY.getSubNode().getCoord().getRtpos();
 		for(int i = 0; i < list.size(); i++) {
 			if(list.get(i)[0] < lpos && rpos < list.get(i)[1]) {
 				return true;
