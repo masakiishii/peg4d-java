@@ -61,8 +61,8 @@ public class Main {
 	// --a
 	public static boolean DiskMode = false;
 
-	//--infer
-	public static boolean InferRelation = false;
+	//for --infer, --fixed and --dtdgen
+	public static String RelType = null;
 
 	// --jvm
 	public static boolean JavaByteCodeGeneration = false;
@@ -126,8 +126,8 @@ public class Main {
 			else if (argument.equals("-a")) {
 				DiskMode = true;
 			}
-			else if (argument.equals("--infer")) {
-				InferRelation = true;
+			else if (argument.equals("--infer") || argument.equals("--fixed") || argument.equals("--dtdgen")) {
+				RelType = argument;
 			}
 			else if(argument.equals("--jvm")) {
 				JavaByteCodeGeneration = true;
@@ -197,7 +197,9 @@ public class Main {
 		System.out.println("  --memo:<num>               Expected backtrack distance (default: 256)");
 		System.out.println("  --verbose                  Printing Debug infomation");
 		System.out.println("  --verbose:memo             Printing Memoization information");
-		System.out.println("  --infer                    Specify an inference schema for rel command");
+		System.out.println("  --infer                    Specify an infer schema for rel command");
+		System.out.println("  --fixed                    Specify an fixed schema for rel command");
+		System.out.println("  --dtdgen                   Generate dtd code for rel command");
 		System.out.println("  --jvm                      Generate java byte code at runtime");
 		System.out.println("");
 		System.out.println("The most commonly used nez commands are:");
@@ -397,7 +399,7 @@ public class Main {
 		ParsingContext context = new ParsingContext(newParsingSource(peg));
 		ParsingObject pego = context.parse(peg, StartingPoint, new MemoizationManager());
 		RelationBuilder RBuilder = new RelationBuilder(pego);
-		RBuilder.build(InferRelation);
+		RBuilder.build(RelType);
 	}
 
 	private static int StatTimes = 10;
