@@ -22,7 +22,7 @@ Name
 	= { NAME #Name }
 
 NAME
-	= [A-Za-z:] ('-' / [.0-9:A-Z_a-z])*
+	= [_A-Za-z:] ('-' / [.0-9:A-Z_a-z])*
 
 Attribute
 	= { @Name S* '=' S* @String #Attr }
