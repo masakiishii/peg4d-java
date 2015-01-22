@@ -402,14 +402,6 @@ public class Main {
 		}
 	}
 
-	public static void rel() {
-		Grammar peg = newGrammar();
-		ParsingContext context = new ParsingContext(newParsingSource(peg));
-		ParsingObject pego = context.parse2(peg, StartingPoint, new ParsingObject(), new MemoizationManager());
-		RelationBuilder RBuilder = new RelationBuilder(pego);
-		RBuilder.build(InferRelation);
-	}
-
 	public static void nezex() {
 		Grammar peg = new GrammarFactory().newGrammar("main", "src/resource/regex.p4d");
 		Main.printVerbose("Grammar", peg.getName());
